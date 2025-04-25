@@ -1,0 +1,18 @@
+{
+  "framework": "react",
+  "projectName": "better-auth-setup",
+  "typescript": true,
+  "tailwind": true,
+  "packageManager": "bun",
+  "toolchain": "none",
+  "mode": "file-router",
+  "git": true,
+  "variableValues": {},
+  "version": 1,
+  "existingAddOns": [
+    "start",
+    "tRPC",
+    "shadcn",
+    "tanstack-query"
+  ]
+}
