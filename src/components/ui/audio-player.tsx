@@ -19,9 +19,9 @@ interface AudioPlayerProps extends React.HTMLAttributes<HTMLDivElement> {
 }
 
 const PLAYBACK_SPEEDS = [
-  { value: '0.5', label: '0.5x' },
-  { value: '0.75', label: '0.75x' },
   { value: '1', label: '1x' },
+  { value: '1.1', label: '1.1x' },
+  { value: '1.2', label: '1.2x' },
   { value: '1.25', label: '1.25x' },
   { value: '1.5', label: '1.5x' },
   { value: '2', label: '2x' },
@@ -133,7 +133,7 @@ export function AudioPlayer({ src, className, ...props }: AudioPlayerProps) {
   return (
     <div
       className={cn(
-        'flex flex-col space-y-4 rounded-lg border-2 bg-card p-4',
+        'flex flex-col gap-4 rounded-lg border-2 bg-card p-4 flex-wrap',
         className,
       )}
       {...props}
@@ -144,26 +144,14 @@ export function AudioPlayer({ src, className, ...props }: AudioPlayerProps) {
         <div className='text-sm text-destructive text-center'>{error}</div>
       )}
 
+      {/* First row - General info and volume control */}
       <div className='flex items-center justify-between'>
         <div className='flex items-center space-x-2'>
-          <Button
-            variant='ghost'
-            size='icon'
-            onClick={togglePlayPause}
-            className='h-8 w-8'
-          >
-            {isPlaying ? (
-              <Pause className='h-4 w-4' />
-            ) : (
-              <Play className='h-4 w-4' />
-            )}
-          </Button>
-
           <Select
             value={playbackSpeed.toString()}
             onValueChange={handleSpeedChange}
           >
-            <SelectTrigger className='h-8 w-[85px]'>
+            <SelectTrigger className='h-8 w-36'>
               <Gauge className='mr-2 h-3 w-3' />
               <SelectValue />
             </SelectTrigger>
@@ -177,23 +165,7 @@ export function AudioPlayer({ src, className, ...props }: AudioPlayerProps) {
           </Select>
         </div>
 
-        <div className='flex flex-1 items-center space-x-2 px-4'>
-          <span className='w-12 text-sm tabular-nums'>
-            {formatTime(currentTime)}
-          </span>
-          <Slider
-            value={[currentTime]}
-            max={duration}
-            step={0.1}
-            onValueChange={handleTimeChange}
-            className='w-full'
-          />
-          <span className='w-12 text-sm tabular-nums'>
-            {formatTime(duration)}
-          </span>
-        </div>
-
-        <div className='flex items-center space-x-2 group'>
+        <div className='flex items-center space-x-2'>
           <Button
             variant='ghost'
             size='icon'
@@ -212,8 +184,40 @@ export function AudioPlayer({ src, className, ...props }: AudioPlayerProps) {
             max={1}
             step={0.01}
             onValueChange={handleVolumeChange}
-            className='w-24 hidden group-hover:flex'
+            className='w-24'
           />
+        </div>
+      </div>
+
+      {/* Second row - Media player controls */}
+      <div className='flex items-center justify-between'>
+        <Button
+          variant='ghost'
+          size='icon'
+          onClick={togglePlayPause}
+          className='h-8 w-8'
+        >
+          {isPlaying ? (
+            <Pause className='h-4 w-4' />
+          ) : (
+            <Play className='h-4 w-4' />
+          )}
+        </Button>
+
+        <div className='flex flex-1 items-center space-x-2 pl-4'>
+          <span className='w-12 text-sm tabular-nums'>
+            {formatTime(currentTime)}
+          </span>
+          <Slider
+            value={[currentTime]}
+            max={duration}
+            step={0.1}
+            onValueChange={handleTimeChange}
+            className='w-full'
+          />
+          <span className='w-12 text-sm tabular-nums text-right'>
+            {formatTime(duration)}
+          </span>
         </div>
       </div>
     </div>
