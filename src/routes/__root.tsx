@@ -6,8 +6,6 @@ import {
 } from '@tanstack/react-router';
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
 
-import Header from '../components/Header';
-
 import TanstackQueryLayout from '../integrations/tanstack-query/layout';
 
 import appCss from '../styles.css?url';
@@ -47,8 +45,6 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 
   component: () => (
     <RootDocument>
-      <Header />
-
       <div className='texture' />
       <Outlet />
       <TanStackRouterDevtools />
@@ -64,7 +60,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       <head>
         <HeadContent />
       </head>
-      <body>
+      <body className='bg-background text-foreground'>
         {children}
         <Scripts />
       </body>
