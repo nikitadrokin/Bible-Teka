@@ -1,0 +1,18 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Bible Audio Project
+
+This project is a web application that allows users to browse and listen to Bible audio chapters.
+
+## Features
+- Bible book and chapter selection
+- Audio playback of selected chapters
+- API proxy to fetch audio files from external source
+
+## Current Issue
+- Audio files are not being fetched properly from the proxy API
+- The HEAD request to /api/audio/$book/$chapter.mp3 is returning 405 Method Not Allowed
+- Need to fix the API route handling for HEAD requests
