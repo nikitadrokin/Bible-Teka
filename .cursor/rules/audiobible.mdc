@@ -1,6 +1,6 @@
 ---
-description:
-globs:
+description: 
+globs: 
 alwaysApply: false
 ---
 # Bible Audio Project
@@ -16,6 +16,16 @@ This project is a web application that allows users to browse and listen to Bibl
 - Using tRPC v11 for type-safe API calls
 - Direct GET requests for audio files instead of HEAD checks
 - External audio source: https://4bbl.ru/data/syn-kozlov
+- Component architecture with separate components for different UI sections
+- State management with React hooks and Zustand for shared state
+
+## Current Work
+- Refactoring the main page component into smaller, reusable components
+- Splitting the UI sections into logical components:
+  - BookSelector
+  - ChapterSelector
+  - AudioSection
+  - BibleInfo
 
 ## Current Issue
 - Audio files are not being fetched properly from the proxy API
