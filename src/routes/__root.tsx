@@ -14,6 +14,7 @@ import type { QueryClient } from '@tanstack/react-query';
 
 import type { TRPCRouter } from '@/integrations/trpc/router';
 import type { TRPCOptionsProxy } from '@trpc/tanstack-react-query';
+import { BibleProvider } from '@/components/bible/BibleContext';
 
 interface MyRouterContext {
   queryClient: QueryClient;
@@ -46,7 +47,9 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
   component: () => (
     <RootDocument>
       <div className='texture' />
-      <Outlet />
+      <BibleProvider>
+        <Outlet />
+      </BibleProvider>
       <TanStackRouterDevtools />
 
       <TanstackQueryLayout />

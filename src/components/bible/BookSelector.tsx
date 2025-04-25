@@ -7,6 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from '@/components/ui/select';
+import { Label } from '../ui/label';
 
 interface BookSelectorProps {
   selectedBookId: string | undefined;
@@ -19,9 +20,9 @@ export function BookSelector({
 }: BookSelectorProps) {
   return (
     <div className='space-y-2'>
-      <label className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70'>
+      <Label className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70'>
         Select a Book
-      </label>
+      </Label>
       <Select onValueChange={onBookSelect} value={selectedBookId}>
         <SelectTrigger>
           <SelectValue placeholder='Choose a book' />

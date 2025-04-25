@@ -23,8 +23,8 @@ const BibleContext = createContext<BibleContextProps | undefined>(undefined);
 
 export function BibleProvider({ children }: { children: ReactNode }) {
   const [selection, setSelection] = useState<BibleBookSelection>({
-    book: null,
-    chapter: null,
+    book: bibleBooks[0],
+    chapter: 1,
   });
 
   const handleBookSelect = (value: string) => {

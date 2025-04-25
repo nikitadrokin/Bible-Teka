@@ -20,37 +20,35 @@ function BibleNavigator() {
   } = useBible();
 
   return (
-    <BibleProvider>
-      <div className='min-h-screen bg-background p-8'>
-        <div className='mx-auto max-w-lg space-y-8'>
-          <h1 className='text-3xl font-bold text-center text-foreground'>
-            Bible Navigator
-          </h1>
+    <div className='min-h-screen bg-background p-8'>
+      <div className='mx-auto max-w-lg grid gap-y-8'>
+        <h1 className='text-3xl font-bold text-center text-foreground'>
+          Bible Navigator
+        </h1>
 
-          <div className='space-y-4'>
-            <BookSelector
-              selectedBookId={selection.book?.id.toString()}
-              onBookSelect={handleBookSelect}
-            />
+        <div className='grid gap-y-4'>
+          <BibleInfo book={selection.book} />
 
-            <ChapterSelector
-              chapters={chapters}
-              selectedChapter={selection.chapter?.toString()}
-              onChapterSelect={handleChapterSelect}
-              disabled={!selection.book}
-            />
+          <AudioSection
+            audioUrl={audioQuery.data}
+            isLoading={audioQuery.isLoading}
+            isError={audioQuery.isError}
+            error={audioQuery.error}
+          />
 
-            <BibleInfo book={selection.book} />
+          <BookSelector
+            selectedBookId={selection.book?.id.toString()}
+            onBookSelect={handleBookSelect}
+          />
 
-            <AudioSection
-              audioUrl={audioQuery.data}
-              isLoading={audioQuery.isLoading}
-              isError={audioQuery.isError}
-              error={audioQuery.error}
-            />
-          </div>
+          <ChapterSelector
+            chapters={chapters}
+            selectedChapter={selection.chapter?.toString()}
+            onChapterSelect={handleChapterSelect}
+            disabled={!selection.book}
+          />
         </div>
       </div>
-    </BibleProvider>
+    </div>
   );
 }
