@@ -8,6 +8,7 @@ import {
   SelectValue,
 } from '@/components/ui/select';
 import { Label } from '../ui/label';
+import { Button } from '../ui/button';
 
 interface BookSelectorProps {
   selectedBookId: string | undefined;
@@ -18,23 +19,28 @@ export function BookSelector({
   selectedBookId,
   onBookSelect,
 }: BookSelectorProps) {
+  // TODO: setting new book sets chapter to 01
+  // we'll need to use context (uncontrolled component)
+
   return (
-    <div className='space-y-2'>
-      <Label className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70'>
-        Select a Book
-      </Label>
-      <Select onValueChange={onBookSelect} value={selectedBookId}>
-        <SelectTrigger>
-          <SelectValue placeholder='Choose a book' />
-        </SelectTrigger>
-        <SelectContent>
-          {bibleBooks.map((book) => (
-            <SelectItem key={book.id} value={book.id.toString()}>
-              {book.name}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+    <div className='grid gap-4'>
+      <Label className='text-sm font-medium leading-none'>Select a Book</Label>
+      <div className='grid grid-cols-[repeat(auto-fill,minmax(115px,1fr))] gap-y-2 gap-x-4'>
+        {bibleBooks.map((book) => (
+          <Button
+            key={book.id}
+            onClick={() => onBookSelect(book.id.toString())}
+            variant={
+              selectedBookId === book.id.toString() ? 'secondary' : 'ghost'
+            }
+            size='sm'
+            type='button'
+            aria-selected={selectedBookId === book.id.toString()}
+          >
+            {book.name}
+          </Button>
+        ))}
+      </div>
     </div>
   );
 }

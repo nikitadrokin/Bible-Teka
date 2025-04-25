@@ -1,11 +1,4 @@
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from '@/components/ui/select';
-
+import { Button } from '../ui/button';
 interface ChapterSelectorProps {
   chapters: number[];
   selectedChapter: string | undefined;
@@ -20,26 +13,27 @@ export function ChapterSelector({
   disabled,
 }: ChapterSelectorProps) {
   return (
-    <div className='space-y-2'>
-      <label className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70'>
+    <div className='grid gap-4'>
+      <label className='text-sm font-medium leading-none'>
         Select a Chapter
       </label>
-      <Select
-        onValueChange={onChapterSelect}
-        value={selectedChapter}
-        disabled={disabled}
-      >
-        <SelectTrigger>
-          <SelectValue placeholder='Choose a chapter' />
-        </SelectTrigger>
-        <SelectContent>
-          {chapters.map((chapter) => (
-            <SelectItem key={chapter} value={chapter.toString()}>
-              Chapter {chapter}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      <div className='grid grid-cols-[repeat(auto-fill,minmax(60px,1fr))] gap-2'>
+        {chapters.map((chapter) => (
+          <Button
+            key={chapter}
+            onClick={() => onChapterSelect(chapter.toString())}
+            variant={
+              selectedChapter === chapter.toString() ? 'secondary' : 'ghost'
+            }
+            size='sm'
+            type='button'
+            disabled={disabled}
+            aria-selected={selectedChapter === chapter.toString()}
+          >
+            {chapter}
+          </Button>
+        ))}
+      </div>
     </div>
   );
 }

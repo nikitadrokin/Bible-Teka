@@ -133,7 +133,7 @@ export function AudioPlayer({ src, className, ...props }: AudioPlayerProps) {
   return (
     <div
       className={cn(
-        'flex flex-col gap-4 rounded-lg border-2 bg-card p-4 flex-wrap',
+        'flex flex-col gap-4 rounded-lg border-2 bg-card p-4',
         className,
       )}
       {...props}
@@ -145,13 +145,13 @@ export function AudioPlayer({ src, className, ...props }: AudioPlayerProps) {
       )}
 
       {/* First row - General info and volume control */}
-      <div className='flex items-center justify-between'>
+      <div className='flex items-center justify-between gap-x-2 gap-y-4 flex-wrap'>
         <div className='flex items-center space-x-2'>
           <Select
             value={playbackSpeed.toString()}
             onValueChange={handleSpeedChange}
           >
-            <SelectTrigger className='h-8 w-36'>
+            <SelectTrigger className='h-8 w-28'>
               <Gauge className='mr-2 h-3 w-3' />
               <SelectValue />
             </SelectTrigger>
