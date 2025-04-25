@@ -3,24 +3,24 @@ import {
   HeadContent,
   Scripts,
   createRootRouteWithContext,
-} from '@tanstack/react-router'
-import { TanStackRouterDevtools } from '@tanstack/react-router-devtools'
+} from '@tanstack/react-router';
+import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
 
-import Header from '../components/Header'
+import Header from '../components/Header';
 
-import TanstackQueryLayout from '../integrations/tanstack-query/layout'
+import TanstackQueryLayout from '../integrations/tanstack-query/layout';
 
-import appCss from '../styles.css?url'
+import appCss from '../styles.css?url';
 
-import type { QueryClient } from '@tanstack/react-query'
+import type { QueryClient } from '@tanstack/react-query';
 
-import type { TRPCRouter } from '@/integrations/trpc/router'
-import type { TRPCOptionsProxy } from '@trpc/tanstack-react-query'
+import type { TRPCRouter } from '@/integrations/trpc/router';
+import type { TRPCOptionsProxy } from '@trpc/tanstack-react-query';
 
 interface MyRouterContext {
-  queryClient: QueryClient
+  queryClient: QueryClient;
 
-  trpc: TRPCOptionsProxy<TRPCRouter>
+  trpc: TRPCOptionsProxy<TRPCRouter>;
 }
 
 export const Route = createRootRouteWithContext<MyRouterContext>()({
@@ -49,17 +49,18 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
     <RootDocument>
       <Header />
 
+      <div className='texture' />
       <Outlet />
       <TanStackRouterDevtools />
 
       <TanstackQueryLayout />
     </RootDocument>
   ),
-})
+});
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
-    <html lang="en">
+    <html lang='en'>
       <head>
         <HeadContent />
       </head>
@@ -68,5 +69,5 @@ function RootDocument({ children }: { children: React.ReactNode }) {
         <Scripts />
       </body>
     </html>
-  )
+  );
 }
