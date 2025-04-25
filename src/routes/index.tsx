@@ -41,7 +41,7 @@ function BibleSelector() {
       try {
         // Check if the audio file exists through our API route
         const response = await fetch(url, {
-          method: 'HEAD',
+          method: 'GET',
         });
 
         if (!response.ok) {

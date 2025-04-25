@@ -10,7 +10,12 @@ This project is a web application that allows users to browse and listen to Bibl
 ## Features
 - Bible book and chapter selection
 - Audio playback of selected chapters
-- API proxy to fetch audio files from external source
+- tRPC-based API for fetching audio files from external source
+
+## Implementation
+- Using tRPC v11 for type-safe API calls
+- Direct GET requests for audio files instead of HEAD checks
+- External audio source: https://4bbl.ru/data/syn-kozlov
 
 ## Current Issue
 - Audio files are not being fetched properly from the proxy API
