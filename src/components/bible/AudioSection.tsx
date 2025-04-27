@@ -1,5 +1,6 @@
 import { AudioPlayer } from '@/components/ui/audio-player';
 import { Skeleton } from '../ui/skeleton';
+import { useBible } from './BibleContext';
 
 interface AudioSectionProps {
   audioUrl: string | null;
@@ -14,6 +15,8 @@ export function AudioSection({
   isError,
   error,
 }: AudioSectionProps) {
+  const { advanceToNextChapter } = useBible();
+
   return (
     <>
       {isLoading && (
@@ -43,7 +46,13 @@ export function AudioSection({
         </div>
       )}
 
-      {audioUrl && <AudioPlayer src={audioUrl} className='mt-4' />}
+      {audioUrl && (
+        <AudioPlayer
+          src={audioUrl}
+          className='mt-4'
+          onEnded={advanceToNextChapter}
+        />
+      )}
     </>
   );
 }

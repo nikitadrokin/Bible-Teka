@@ -1,4 +1,10 @@
-import { createContext, useContext, useState } from 'react';
+import {
+  createContext,
+  useContext,
+  useState,
+  useCallback,
+  useEffect,
+} from 'react';
 import type { ReactNode } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import type { BibleBookSelection, BibleBook } from '@/types/bible';
@@ -17,6 +23,8 @@ interface BibleContextProps {
   handleBookSelect: (value: string) => void;
   handleChapterSelect: (value: string) => void;
   chapters: number[];
+  advanceToNextChapter: () => void;
+  advanceToNextBook: () => void;
 }
 
 const BibleContext = createContext<BibleContextProps | undefined>(undefined);
@@ -48,6 +56,47 @@ export function BibleProvider({ children }: { children: ReactNode }) {
   const chapters = selection.book
     ? Array.from({ length: selection.book.chapters }, (_, i) => i + 1)
     : [];
+
+  // Advance to the next chapter or next book's first chapter
+  const advanceToNextChapter = useCallback(() => {
+    if (!selection.book || !selection.chapter) return;
+
+    // If current chapter is not the last one in the book
+    if (selection.chapter < selection.book.chapters) {
+      // Go to next chapter
+      setSelection((prev) => ({
+        ...prev,
+        chapter: (prev.chapter || 0) + 1,
+      }));
+    } else {
+      // Go to first chapter of next book
+      advanceToNextBook();
+    }
+  }, [selection.book, selection.chapter]);
+
+  // Advance to the next book, starting from chapter 1
+  const advanceToNextBook = useCallback(() => {
+    if (!selection.book) return;
+
+    // If not the last book
+    if (selection.book.id < bibleBooks.length - 1) {
+      const nextBook = bibleBooks.find(
+        (book) => book.id === selection.book!.id + 1,
+      );
+      if (nextBook) {
+        setSelection({
+          book: nextBook,
+          chapter: 1,
+        });
+      }
+    } else {
+      // If it's the last book, loop back to the first book
+      setSelection({
+        book: bibleBooks[0],
+        chapter: 1,
+      });
+    }
+  }, [selection.book]);
 
   const {
     data: audioData,
@@ -86,6 +135,19 @@ export function BibleProvider({ children }: { children: ReactNode }) {
     retry: 1, // Only retry once
   });
 
+  // Handle audio fetch errors by advancing to the next book
+  useEffect(() => {
+    if (isError && selection.book && selection.chapter) {
+      console.log('Error fetching audio, advancing to next book');
+      // Use a small delay to prevent immediate re-render issues
+      const timeoutId = setTimeout(() => {
+        advanceToNextBook();
+      }, 1000);
+
+      return () => clearTimeout(timeoutId);
+    }
+  }, [isError, selection.book, selection.chapter, advanceToNextBook]);
+
   // Ensure audioData is never undefined, only string | null
   const audioQuery = {
     data: audioData ?? null,
@@ -103,6 +165,8 @@ export function BibleProvider({ children }: { children: ReactNode }) {
         handleBookSelect,
         handleChapterSelect,
         chapters,
+        advanceToNextChapter,
+        advanceToNextBook,
       }}
     >
       {children}

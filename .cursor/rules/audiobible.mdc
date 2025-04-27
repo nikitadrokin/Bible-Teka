@@ -37,3 +37,7 @@ This project is a web application that allows users to browse and listen to Bibl
 - Ensure that audio starts preloading and playing immediately after book selection
 - Update BibleContext.tsx to manage this new selection flow
 - Update index.tsx to properly handle the modified context behavior
+- Implement auto-advancing functionality:
+  - When the current chapter finishes playing, automatically advance to the next chapter
+  - If the current chapter is the last chapter of a book, advance to the first chapter of the next book
+  - If the API returns an error while fetching a chapter, skip to the next chapter or book

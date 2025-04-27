@@ -16,6 +16,7 @@ import { useAudioStore } from '@/store/audio-store';
 
 interface AudioPlayerProps extends React.HTMLAttributes<HTMLDivElement> {
   src: string;
+  onEnded?: () => void;
 }
 
 const PLAYBACK_SPEEDS = [
@@ -27,7 +28,12 @@ const PLAYBACK_SPEEDS = [
   { value: '2', label: '2x' },
 ] as const;
 
-export function AudioPlayer({ src, className, ...props }: AudioPlayerProps) {
+export function AudioPlayer({
+  src,
+  className,
+  onEnded,
+  ...props
+}: AudioPlayerProps) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -43,7 +49,12 @@ export function AudioPlayer({ src, className, ...props }: AudioPlayerProps) {
 
     const handleTimeUpdate = () => setCurrentTime(audio.currentTime);
     const handleLoadedMetadata = () => setDuration(audio.duration);
-    const handleEnded = () => setIsPlaying(false);
+    const handleEnded = () => {
+      setIsPlaying(false);
+      if (onEnded) {
+        onEnded();
+      }
+    };
     const handleError = (e: ErrorEvent) => {
       console.error('Audio playback error:', e);
       setError('Failed to play audio. Please try again.');
@@ -72,7 +83,7 @@ export function AudioPlayer({ src, className, ...props }: AudioPlayerProps) {
       audio.removeEventListener('error', handleError);
       audio.removeEventListener('canplay', handleCanPlay);
     };
-  }, [playbackSpeed]);
+  }, [playbackSpeed, onEnded]);
 
   // Auto-play when src changes
   useEffect(() => {
