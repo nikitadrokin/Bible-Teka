@@ -31,9 +31,10 @@ export function BibleProvider({ children }: { children: ReactNode }) {
     const selectedBook = bibleBooks.find(
       (book: BibleBook) => book.id === parseInt(value),
     );
+    // Always set chapter to 1 when a book is selected
     setSelection({
       book: selectedBook ?? null,
-      chapter: null,
+      chapter: selectedBook ? 1 : null,
     });
   };
 

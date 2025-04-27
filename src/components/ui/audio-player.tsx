@@ -74,6 +74,42 @@ export function AudioPlayer({ src, className, ...props }: AudioPlayerProps) {
     };
   }, [playbackSpeed]);
 
+  // Auto-play when src changes
+  useEffect(() => {
+    const audio = audioRef.current;
+    if (!audio) return;
+
+    // Reset current time when src changes
+    setCurrentTime(0);
+
+    // Attempt to play audio when src changes
+    const playAudio = async () => {
+      try {
+        await audio.play();
+        setIsPlaying(true);
+        setError(null);
+      } catch (err) {
+        console.error('Auto-play failed:', err);
+        // Don't set error here as it might be due to browser autoplay policy
+        // User can still click play manually
+      }
+    };
+
+    // Audio needs to be loaded before we can play it
+    const handleCanPlayAutoPlay = () => {
+      playAudio();
+      // Remove event listener after first trigger
+      audio.removeEventListener('canplaythrough', handleCanPlayAutoPlay);
+    };
+
+    audio.addEventListener('canplaythrough', handleCanPlayAutoPlay);
+
+    // Clean up
+    return () => {
+      audio.removeEventListener('canplaythrough', handleCanPlayAutoPlay);
+    };
+  }, [src]);
+
   const togglePlayPause = async () => {
     if (!audioRef.current) return;
 
