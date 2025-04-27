@@ -33,7 +33,8 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
         content: 'width=device-width, initial-scale=1',
       },
       {
-        title: 'TanStack Start Starter',
+        title: 'Bible Teka',
+        description: 'Clone of Bible Teka for personal use',
       },
     ],
     links: [
