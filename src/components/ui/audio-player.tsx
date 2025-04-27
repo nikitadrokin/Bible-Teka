@@ -42,12 +42,19 @@ export function AudioPlayer({
   const [isMuted, setIsMuted] = useState(false);
   const [error, setError] = useState<string | null>(null);
   const { playbackSpeed, setPlaybackSpeed } = useAudioStore();
+  const [isScrubbing, setIsScrubbing] = useState(false);
 
   useEffect(() => {
     const audio = audioRef.current;
     if (!audio) return;
 
-    const handleTimeUpdate = () => setCurrentTime(audio.currentTime);
+    const handleTimeUpdate = () => {
+      // Only update current time if user is not scrubbing
+      if (!isScrubbing) {
+        setCurrentTime(audio.currentTime);
+      }
+    };
+
     const handleLoadedMetadata = () => setDuration(audio.duration);
     const handleEnded = () => {
       setIsPlaying(false);
@@ -83,7 +90,7 @@ export function AudioPlayer({
       audio.removeEventListener('error', handleError);
       audio.removeEventListener('canplay', handleCanPlay);
     };
-  }, [playbackSpeed, onEnded]);
+  }, [playbackSpeed, onEnded, isScrubbing]);
 
   // Auto-play when src changes
   useEffect(() => {
@@ -139,10 +146,40 @@ export function AudioPlayer({
     }
   };
 
+  // Handle when user starts scrubbing
+  const handleScrubStart = () => {
+    setIsScrubbing(true);
+
+    // Pause if playing to make scrubbing smoother
+    if (isPlaying && audioRef.current) {
+      audioRef.current.pause();
+    }
+  };
+
+  // Handle when user finishes scrubbing
+  const handleScrubEnd = () => {
+    setIsScrubbing(false);
+
+    // Resume playback if it was playing before
+    if (isPlaying && audioRef.current) {
+      audioRef.current.play().catch((err) => {
+        console.error('Error resuming playback after scrub:', err);
+      });
+    }
+  };
+
   const handleTimeChange = (value: number[]) => {
-    if (!audioRef.current) return;
-    audioRef.current.currentTime = value[0];
-    setCurrentTime(value[0]);
+    if (!audioRef.current || !value.length) return;
+
+    const newTime = value[0];
+
+    // Update the current time state immediately for smoother UI
+    setCurrentTime(newTime);
+
+    // Only update the actual audio time if the value has changed significantly
+    if (Math.abs(audioRef.current.currentTime - newTime) > 0.5) {
+      audioRef.current.currentTime = newTime;
+    }
   };
 
   const handleVolumeChange = (value: number[]) => {
@@ -260,6 +297,8 @@ export function AudioPlayer({
             max={duration}
             step={0.1}
             onValueChange={handleTimeChange}
+            onValueCommit={handleScrubEnd}
+            onPointerDown={handleScrubStart}
             className='w-full'
           />
           <span className='w-12 text-sm tabular-nums text-right'>

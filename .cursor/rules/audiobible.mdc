@@ -31,6 +31,7 @@ This project is a web application that allows users to browse and listen to Bibl
 - Audio files are not being fetched properly from the proxy API
 - The HEAD request to /api/audio/$book/$chapter.mp3 is returning 405 Method Not Allowed
 - Need to fix the API route handling for HEAD requests
+- Time scrubber in audio player resets to 0:00 when clicked in production environment
 
 ## Latest Task
 - Modify book selection behavior to automatically select chapter 1 when a book is chosen
@@ -41,3 +42,4 @@ This project is a web application that allows users to browse and listen to Bibl
   - When the current chapter finishes playing, automatically advance to the next chapter
   - If the current chapter is the last chapter of a book, advance to the first chapter of the next book
   - If the API returns an error while fetching a chapter, skip to the next chapter or book
+- Fix the audio scrubber issue in production where selecting any part of the slider resets playback to 0:00
