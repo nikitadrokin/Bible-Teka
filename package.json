@@ -7,7 +7,8 @@
     "start": "vinxi start",
     "build": "vinxi build",
     "serve": "vite preview",
-    "test": "vitest run"
+    "test": "vitest run",
+    "generate-pwa-assets": "pwa-assets-generator --config pwa-assets.config.ts"
   },
   "dependencies": {
     "@radix-ui/react-label": "^2.1.4",
@@ -45,6 +46,7 @@
     "@testing-library/react": "^16.2.0",
     "@types/react": "^19.0.8",
     "@types/react-dom": "^19.0.3",
+    "@vite-pwa/assets-generator": "^1.0.0",
     "@vitejs/plugin-react": "^4.3.4",
     "jsdom": "^26.0.0",
     "typescript": "^5.7.2",
