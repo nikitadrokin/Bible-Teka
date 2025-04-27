@@ -21,13 +21,13 @@
       "src": "apple-touch-icon-180x180.png",
       "sizes": "180x180",
       "type": "image/png",
-      "purpose": "any maskable"
+      "purpose": "any"
     }
   ],
   "start_url": ".",
   "display": "standalone",
   "theme_color": "#000000",
-  "background_color": "#ffffff",
+  "background_color": "#decfb0",
   "orientation": "portrait",
   "description": "Audio Bible player for personal use",
   "apple-mobile-web-app-capable": "yes",
