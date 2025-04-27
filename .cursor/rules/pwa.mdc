@@ -1,0 +1,13 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Bible-Teka PWA Configurations
+
+## Apple PWA Specific Configurations
+- Add Apple-specific PWA configurations to the manifest.json file
+- Ensure proper iOS PWA display and functionality
+- Configure apple-mobile-web-app-capable and related properties
+- Link to the existing apple-touch-icon
+- Configure splash screen settings for iOS devices
