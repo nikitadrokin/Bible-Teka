@@ -5,6 +5,7 @@ import {
   createRootRouteWithContext,
 } from '@tanstack/react-router';
 import { TanStackRouterDevtools } from '@tanstack/react-router-devtools';
+import { useEffect } from 'react';
 
 import TanstackQueryLayout from '../integrations/tanstack-query/layout';
 
@@ -14,12 +15,27 @@ import type { QueryClient } from '@tanstack/react-query';
 
 import type { TRPCRouter } from '@/integrations/trpc/router';
 import type { TRPCOptionsProxy } from '@trpc/tanstack-react-query';
-import { BibleProvider } from '@/components/bible/BibleContext';
+import { BibleProvider, useBible } from '@/components/bible/BibleContext';
 
 interface MyRouterContext {
   queryClient: QueryClient;
 
   trpc: TRPCOptionsProxy<TRPCRouter>;
+}
+
+function DynamicTitle() {
+  const { selection } = useBible();
+
+  useEffect(() => {
+    const title =
+      selection.book && selection.chapter
+        ? `${selection.book.name} ${selection.chapter} | Bible Teka`
+        : 'Bible Teka';
+
+    document.title = title;
+  }, [selection.book, selection.chapter]);
+
+  return null;
 }
 
 export const Route = createRootRouteWithContext<MyRouterContext>()({
@@ -57,6 +73,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
     <RootDocument>
       <div className='texture' />
       <BibleProvider>
+        <DynamicTitle />
         <Outlet />
       </BibleProvider>
       <TanStackRouterDevtools />
