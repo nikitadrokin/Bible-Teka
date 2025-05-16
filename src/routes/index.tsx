@@ -5,6 +5,7 @@ import { BookSelector } from '@/components/bible/BookSelector';
 import { BibleInfo } from '@/components/bible/BibleInfo';
 import { ChapterSelector } from '@/components/bible/ChapterSelector';
 import { AudioSection } from '@/components/bible/AudioSection';
+import { HistorySection } from '@/components/bible/HistorySection';
 import { Separator } from '@/components/ui/separator';
 import { useTranslation } from 'react-i18next';
 import { LocaleSwitcher } from '@/components/ui/locale-switcher';
@@ -47,6 +48,12 @@ function BibleNavigator() {
             error={audioQuery.error}
           />
         </div>
+
+        <div className='px-1'>
+          <Separator />
+        </div>
+
+        <HistorySection />
 
         <div className='px-1'>
           <Separator />

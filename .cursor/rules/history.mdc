@@ -1,0 +1,21 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Bible Reading History Feature
+
+## Requirements
+- Track the history of Bible chapters read by the user
+- Store the last 20 selected chapters in local storage
+- Automatically select the most recent chapter when reopening the app
+- Allow users to view their reading history
+- Implement using Zustand with persist middleware for local storage
+
+## Implementation Plan
+- Create a new history store using Zustand
+- Store an array of recent selections (book and chapter)
+- Add functions to add new entries to history
+- Limit history to 20 entries
+- Update BibleContext to use the history store
+- Create a UI component to display reading history

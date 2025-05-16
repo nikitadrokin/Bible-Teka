@@ -11,6 +11,7 @@ import type { BibleBookSelection, BibleBook } from '@/types/bible';
 import { padNumber } from '@/lib/utils';
 import { bibleBooksEnglish, bibleBooksRussian } from '@/data/bible';
 import { useLocaleStore } from '@/store/locale-store';
+import { useHistoryStore } from '@/store/history-store';
 
 interface BibleContextProps {
   selection: BibleBookSelection;
@@ -26,6 +27,7 @@ interface BibleContextProps {
   chapters: number[];
   advanceToNextChapter: () => void;
   advanceToNextBook: () => void;
+  history: BibleBookSelection[];
 }
 
 const BibleContext = createContext<BibleContextProps | undefined>(undefined);
@@ -33,11 +35,29 @@ const BibleContext = createContext<BibleContextProps | undefined>(undefined);
 export function BibleProvider({ children }: { children: ReactNode }) {
   const { locale } = useLocaleStore();
   const books = locale === 'en' ? bibleBooksEnglish : bibleBooksRussian;
+  const { history, addToHistory } = useHistoryStore();
 
-  // TODO: remember from local storage the last book and chapter before tab close
-  const [selection, setSelection] = useState<BibleBookSelection>({
-    book: books[0],
-    chapter: 1,
+  // Initialize with the most recent history item or default to Genesis 1
+  const [selection, setSelection] = useState<BibleBookSelection>(() => {
+    const mostRecent = history[0];
+    // Check if mostRecent exists and has valid book and chapter
+    if (mostRecent && mostRecent.book && mostRecent.chapter) {
+      // Find the book in the current locale
+      const bookInCurrentLocale = books.find(
+        (book) => book.id === mostRecent.book?.id,
+      );
+      if (bookInCurrentLocale) {
+        return {
+          book: bookInCurrentLocale,
+          chapter: mostRecent.chapter,
+        };
+      }
+    }
+    // Default to first book, first chapter
+    return {
+      book: books[0],
+      chapter: 1,
+    };
   });
 
   // Update book when locale changes while maintaining the same book ID
@@ -53,6 +73,13 @@ export function BibleProvider({ children }: { children: ReactNode }) {
       }
     }
   }, [locale, books]);
+
+  // Add to history when selection changes
+  useEffect(() => {
+    if (selection.book && selection.chapter) {
+      addToHistory(selection);
+    }
+  }, [selection.book?.id, selection.chapter]);
 
   const handleBookSelect = (value: string) => {
     const selectedBook = books.find(
@@ -173,6 +200,12 @@ export function BibleProvider({ children }: { children: ReactNode }) {
     error,
   };
 
+  // Format history for the context
+  const formattedHistory = history.map((entry) => ({
+    book: entry.book,
+    chapter: entry.chapter,
+  }));
+
   return (
     <BibleContext.Provider
       value={{
@@ -184,6 +217,7 @@ export function BibleProvider({ children }: { children: ReactNode }) {
         chapters,
         advanceToNextChapter,
         advanceToNextBook,
+        history: formattedHistory,
       }}
     >
       {children}
