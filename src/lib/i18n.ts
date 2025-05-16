@@ -21,6 +21,12 @@ const enResources = {
     // Language switcher
     english: 'English',
     russian: 'Русский',
+
+    // History dialog
+    viewHistory: 'История чтения',
+    readingHistory: 'История чтения',
+    clearHistory: 'Очистить историю',
+    noHistory: 'История чтения пуста',
   },
 };
 
@@ -43,6 +49,12 @@ const ruResources = {
     // Language switcher
     english: 'English',
     russian: 'Русский',
+
+    // History dialog
+    viewHistory: 'История чтения',
+    readingHistory: 'История чтения',
+    clearHistory: 'Очистить историю',
+    noHistory: 'История чтения пуста',
   },
 };
 

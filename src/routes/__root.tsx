@@ -17,8 +17,6 @@ import type { TRPCRouter } from '@/integrations/trpc/router';
 import type { TRPCOptionsProxy } from '@trpc/tanstack-react-query';
 import { BibleProvider, useBible } from '@/components/bible/BibleContext';
 import { useTranslation } from 'react-i18next';
-import { useLocaleStore } from '@/store/locale-store';
-import { bibleBooksEnglish, bibleBooksRussian } from '@/data/bible';
 
 interface MyRouterContext {
   queryClient: QueryClient;

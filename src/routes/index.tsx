@@ -5,7 +5,7 @@ import { BookSelector } from '@/components/bible/BookSelector';
 import { BibleInfo } from '@/components/bible/BibleInfo';
 import { ChapterSelector } from '@/components/bible/ChapterSelector';
 import { AudioSection } from '@/components/bible/AudioSection';
-import { HistorySection } from '@/components/bible/HistorySection';
+import { HistoryDialog } from '@/components/bible/HistoryDialog';
 import { Separator } from '@/components/ui/separator';
 import { useTranslation } from 'react-i18next';
 import { LocaleSwitcher } from '@/components/ui/locale-switcher';
@@ -35,11 +35,15 @@ function BibleNavigator() {
           <h1 className='text-3xl font-bold text-foreground inline-block'>
             {t('appTitle')}
           </h1>
+
           <LocaleSwitcher />
         </div>
 
-        <div className='grid gap-y-4'>
-          <BibleInfo book={selection.book} />
+        <div className='grid gap-y-2'>
+          <div className='flex items-center justify-between gap-2'>
+            <BibleInfo book={selection.book} />
+            <HistoryDialog />
+          </div>
 
           <AudioSection
             audioUrl={audioQuery.data}
@@ -48,12 +52,6 @@ function BibleNavigator() {
             error={audioQuery.error}
           />
         </div>
-
-        <div className='px-1'>
-          <Separator />
-        </div>
-
-        <HistorySection />
 
         <div className='px-1'>
           <Separator />

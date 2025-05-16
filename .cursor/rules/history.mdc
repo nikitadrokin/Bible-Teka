@@ -6,16 +6,27 @@ alwaysApply: false
 # Bible Reading History Feature
 
 ## Requirements
-- Track the history of Bible chapters read by the user
-- Store the last 20 selected chapters in local storage
-- Automatically select the most recent chapter when reopening the app
+- Track user's reading history (book and chapter selections)
+- Store history entries with timestamps
 - Allow users to view their reading history
-- Implement using Zustand with persist middleware for local storage
+- Allow users to clear their history
+- Display history in a dialog that can be opened from the header
+- Show each history entry with book name, chapter number, and timestamp
+- Allow users to click on a history entry to navigate to that book and chapter
 
-## Implementation Plan
-- Create a new history store using Zustand
-- Store an array of recent selections (book and chapter)
-- Add functions to add new entries to history
-- Limit history to 20 entries
-- Update BibleContext to use the history store
-- Create a UI component to display reading history
+## Implementation
+- Use Zustand for state management
+- Store history entries in local storage
+- Create a history store with add and clear functions
+- Implement a HistoryDialog component with a trigger button in the header
+- Format dates based on the current locale
+- Provide empty state message when no history exists
+- Show scrollable list of history entries when available
+- Add clear history button in the dialog header
+
+## Design
+- Use Dialog component from shadcn/ui
+- Display history entries in a scrollable list
+- Style history entries as clickable buttons
+- Show timestamp in a smaller, muted text
+- Keep the UI clean and consistent with the rest of the application
