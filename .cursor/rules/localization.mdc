@@ -1,0 +1,39 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Localization
+
+This file documents the localization implementation for the BibleTeka application.
+
+## Requirements
+
+- Support for English and Russian languages
+- Ability to switch between languages via UI
+- Persist language preference
+- Translate all UI text
+
+## Implementation
+
+1. Created a Zustand store (`locale-store.ts`) to manage and persist the selected locale
+2. Set up i18n configuration with react-i18next in `lib/i18n.ts`
+3. Created a LocaleSwitcher component for toggling between languages
+4. Added synchronization between the Zustand store and i18n
+5. Integrated the LocaleSwitcher in the main UI
+6. Added translations for all UI text in both English and Russian
+
+## Translations
+
+The following text elements have been translated:
+- App title ("BibleTeka" / "БиблиоТека")
+- Bible navigation labels ("Select a Book", "Select a Chapter", etc.)
+- Testament labels ("Old Testament", "New Testament")
+- Audio player error messages
+- Language switcher labels
+
+## Next Steps
+
+1. Consider translating Bible book names if needed
+2. Add more languages in the future if needed
+3. Ensure any new UI elements use the translation function

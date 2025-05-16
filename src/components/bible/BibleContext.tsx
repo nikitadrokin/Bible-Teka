@@ -9,7 +9,8 @@ import type { ReactNode } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import type { BibleBookSelection, BibleBook } from '@/types/bible';
 import { padNumber } from '@/lib/utils';
-import { bibleBooks } from '@/data/bible';
+import { bibleBooksEnglish, bibleBooksRussian } from '@/data/bible';
+import { useLocaleStore } from '@/store/locale-store';
 
 interface BibleContextProps {
   selection: BibleBookSelection;
@@ -30,13 +31,31 @@ interface BibleContextProps {
 const BibleContext = createContext<BibleContextProps | undefined>(undefined);
 
 export function BibleProvider({ children }: { children: ReactNode }) {
+  const { locale } = useLocaleStore();
+  const books = locale === 'en' ? bibleBooksEnglish : bibleBooksRussian;
+
+  // TODO: remember from local storage the last book and chapter before tab close
   const [selection, setSelection] = useState<BibleBookSelection>({
-    book: bibleBooks[0],
+    book: books[0],
     chapter: 1,
   });
 
+  // Update book when locale changes while maintaining the same book ID
+  useEffect(() => {
+    if (selection.book) {
+      const currentBookId = selection.book.id;
+      const bookInNewLocale = books.find((book) => book.id === currentBookId);
+      if (bookInNewLocale) {
+        setSelection((prev) => ({
+          ...prev,
+          book: bookInNewLocale,
+        }));
+      }
+    }
+  }, [locale, books]);
+
   const handleBookSelect = (value: string) => {
-    const selectedBook = bibleBooks.find(
+    const selectedBook = books.find(
       (book: BibleBook) => book.id === parseInt(value),
     );
     // Always set chapter to 1 when a book is selected
@@ -79,10 +98,8 @@ export function BibleProvider({ children }: { children: ReactNode }) {
     if (!selection.book) return;
 
     // If not the last book
-    if (selection.book.id < bibleBooks.length - 1) {
-      const nextBook = bibleBooks.find(
-        (book) => book.id === selection.book!.id + 1,
-      );
+    if (selection.book.id < books.length - 1) {
+      const nextBook = books.find((book) => book.id === selection.book!.id + 1);
       if (nextBook) {
         setSelection({
           book: nextBook,
@@ -92,7 +109,7 @@ export function BibleProvider({ children }: { children: ReactNode }) {
     } else {
       // If it's the last book, loop back to the first book
       setSelection({
-        book: bibleBooks[0],
+        book: books[0],
         chapter: 1,
       });
     }

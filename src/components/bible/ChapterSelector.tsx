@@ -1,4 +1,6 @@
 import { Button } from '../ui/button';
+import { useTranslation } from 'react-i18next';
+
 interface ChapterSelectorProps {
   chapters: number[];
   selectedChapter: string | undefined;
@@ -12,12 +14,14 @@ export function ChapterSelector({
   onChapterSelect,
   disabled,
 }: ChapterSelectorProps) {
+  const { t } = useTranslation();
+
   return (
     <div className='grid gap-4'>
       <label className='text-sm font-medium leading-none'>
-        Select a Chapter
+        {t('selectChapter')}
       </label>
-      <div className='grid grid-cols-[repeat(auto-fill,minmax(60px,1fr))] gap-2'>
+      <div className='grid gap-2 grid-cols-[repeat(auto-fill,minmax(60px,1fr))]'>
         {chapters.map((chapter) => (
           <Button
             key={chapter}

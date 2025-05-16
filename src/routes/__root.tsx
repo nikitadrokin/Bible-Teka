@@ -16,6 +16,9 @@ import type { QueryClient } from '@tanstack/react-query';
 import type { TRPCRouter } from '@/integrations/trpc/router';
 import type { TRPCOptionsProxy } from '@trpc/tanstack-react-query';
 import { BibleProvider, useBible } from '@/components/bible/BibleContext';
+import { useTranslation } from 'react-i18next';
+import { useLocaleStore } from '@/store/locale-store';
+import { bibleBooksEnglish, bibleBooksRussian } from '@/data/bible';
 
 interface MyRouterContext {
   queryClient: QueryClient;
@@ -25,12 +28,13 @@ interface MyRouterContext {
 
 function DynamicTitle() {
   const { selection } = useBible();
+  const { t } = useTranslation();
 
   useEffect(() => {
     const title =
       selection.book && selection.chapter
-        ? `${selection.book.name} ${selection.chapter} | Bible Teka`
-        : 'Bible Teka';
+        ? `${selection.book.name} ${selection.chapter} | ${t('appTitle')}`
+        : t('appTitle');
 
     document.title = title;
   }, [selection.book, selection.chapter]);

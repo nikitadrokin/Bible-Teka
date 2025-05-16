@@ -1,6 +1,7 @@
 import { AudioPlayer } from '@/components/ui/audio-player';
 import { Skeleton } from '../ui/skeleton';
 import { useBible } from './BibleContext';
+import { useTranslation } from 'react-i18next';
 
 interface AudioSectionProps {
   audioUrl: string | null;
@@ -16,6 +17,7 @@ export function AudioSection({
   error,
 }: AudioSectionProps) {
   const { advanceToNextChapter } = useBible();
+  const { t } = useTranslation();
 
   return (
     <>
@@ -41,8 +43,8 @@ export function AudioSection({
 
       {isError && (
         <div className='mt-4 text-center text-destructive'>
-          Failed to load audio file:{' '}
-          {error instanceof Error ? error.message : 'Unknown error'}
+          {t('failedToLoadAudio')}{' '}
+          {error instanceof Error ? error.message : t('unknownError')}
         </div>
       )}
 
