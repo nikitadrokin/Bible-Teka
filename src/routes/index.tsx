@@ -30,21 +30,9 @@ function BibleNavigator() {
 
   return (
     <div className='min-h-screen bg-background p-8'>
-      <div className='mx-auto max-w-xl grid gap-y-8'>
-        <div className='flex justify-between items-center'>
-          <h1 className='text-3xl font-bold text-foreground inline-block'>
-            {t('appTitle')}
-          </h1>
-
-          <LocaleSwitcher />
-        </div>
-
-        <div className='grid gap-y-2'>
-          <div className='flex items-center justify-between gap-2'>
-            <BibleInfo book={selection.book} />
-            <HistoryDialog />
-          </div>
-
+      <div className='mx-auto grid gap-y-8 md:grid md:grid-cols-3 md:gap-8'>
+        {/* Left Column */}
+        <div className='md:col-span-1'>
           <AudioSection
             audioUrl={audioQuery.data}
             isLoading={audioQuery.isLoading}
@@ -53,21 +41,36 @@ function BibleNavigator() {
           />
         </div>
 
-        <div className='px-1'>
+        {/* Right Column */}
+        <div className='md:col-span-2 grid gap-y-6'>
+          <div className='flex justify-between items-center'>
+            <h1 className='text-3xl font-bold text-foreground inline-block'>
+              {t('appTitle')}
+            </h1>
+            <LocaleSwitcher />
+          </div>
+
+          <div className='grid gap-y-2'> {/* This div originally wrapped BibleInfo and HistoryDialog along with AudioSection. We keep its structure for these two. */}
+            <div className='flex items-center justify-between gap-2'>
+              <BibleInfo book={selection.book} />
+              <HistoryDialog />
+            </div>
+          </div>
+
           <Separator />
+
+          <ChapterSelector
+            chapters={chapters}
+            selectedChapter={selection.chapter?.toString()}
+            onChapterSelect={handleChapterSelect}
+            disabled={!selection.book}
+          />
+
+          <BookSelector
+            selectedBookId={selection.book?.id.toString()}
+            onBookSelect={handleBookSelect}
+          />
         </div>
-
-        <ChapterSelector
-          chapters={chapters}
-          selectedChapter={selection.chapter?.toString()}
-          onChapterSelect={handleChapterSelect}
-          disabled={!selection.book}
-        />
-
-        <BookSelector
-          selectedBookId={selection.book?.id.toString()}
-          onBookSelect={handleBookSelect}
-        />
       </div>
     </div>
   );
