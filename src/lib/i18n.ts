@@ -23,10 +23,10 @@ const enResources = {
     russian: 'Русский',
 
     // History dialog
-    viewHistory: 'История чтения',
-    readingHistory: 'История чтения',
-    clearHistory: 'Очистить историю',
-    noHistory: 'История чтения пуста',
+    viewHistory: 'View History',
+    readingHistory: 'Reading History',
+    clearHistory: 'Clear History',
+    noHistory: 'No history yet',
   },
 };
 
