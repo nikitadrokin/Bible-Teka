@@ -1,6 +1,6 @@
 ---
-description:
-globs:
+description: When working with PWA-specific functionality
+globs: 
 alwaysApply: false
 ---
 # Bible-Teka PWA Configurations
@@ -11,3 +11,10 @@ alwaysApply: false
 - Configure apple-mobile-web-app-capable and related properties
 - Link to the existing apple-touch-icon
 - Configure splash screen settings for iOS devices
+
+## Audio Playback Features
+- Implement Media Session API for audio metadata on iOS and Android
+- Set title, artist, album, and artwork for lock screen and control center display
+- Configure media session action handlers for play, pause, and seek functionality
+- Update position state for accurate playback progress information
+- Support background audio playback in PWA mode
