@@ -21,7 +21,7 @@
 
 html {
   /* Set background on html for full coverage */
-  background-color: #decfb0;
+  background-color: var(--background);
   /* Allow natural overscroll behavior */
   overscroll-behavior: auto;
 }
@@ -29,7 +29,7 @@ html {
 body {
   @apply m-0;
   /* Set the paper notepad background color */
-  background-color: #decfb0;
+  background-color: var(--background);
 
   /* Extend background to fill entire viewport including safe areas */
   min-height: 100vh;
@@ -100,10 +100,6 @@ code {
     @apply border-border outline-ring/50;
   }
 
-  html {
-    @apply !bg-background;
-  }
-
   body {
     @apply text-foreground;
     /* Force our custom background color to override any Tailwind classes */
@@ -134,6 +130,7 @@ code {
 
   /* Main app container that handles safe areas */
   .app-container {
+    /* background-color: var(--background); */
     min-height: 100vh;
     min-height: 100dvh;
     padding-top: var(--safe-area-inset-top);

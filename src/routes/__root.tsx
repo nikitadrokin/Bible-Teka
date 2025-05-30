@@ -89,11 +89,12 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
+    // check what's causing this incorrect bg color to be applied
     <html lang='en'>
       <head>
         <HeadContent />
       </head>
-      <body className='bg-background text-foreground'>
+      <body>
         {children}
         <Scripts />
       </body>
