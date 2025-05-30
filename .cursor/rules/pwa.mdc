@@ -24,6 +24,8 @@ alwaysApply: false
 - Set background color to #decfb0 (paper notepad theme color) on body/root element
 - Extend background outside safe areas for native app feel
 - Use CSS env() variables for safe area insets (safe-area-inset-top, safe-area-inset-bottom, safe-area-inset-left, safe-area-inset-right)
-- Apply proper padding to content areas while keeping background full-bleed
+- Apply safe area padding to main app containers using .app-container class, NOT to body element
+- Preserve natural scrolling behavior and pull-to-refresh gestures by avoiding overscroll-behavior: none on body
 - Maintain paper texture overlay for authentic notepad appearance
 - Ensure proper viewport-fit=cover meta tag for full-screen display
+- Use overscroll-behavior: auto to maintain native iOS/Android scrolling experience

@@ -25,7 +25,8 @@ alwaysApply: false
 - Add clear history button in the dialog header
 
 ## Design
-- Use Dialog component from shadcn/ui
+- Use Dialog component from shadcn/ui for desktop
+- Use Drawer component from shadcn/ui for mobile with background scaling
 - Display history entries in a scrollable list
 - Style history entries as clickable buttons
 - Show timestamp in a smaller, muted text
@@ -44,9 +45,16 @@ Implementation of reading history functionality for the Bible app, allowing user
 - **Features**:
   - Responsive design using useMediaQuery hook for desktop/mobile layouts
   - Desktop: Modal dialog with clear history button
-  - Mobile: Bottom drawer interface
+  - Mobile: Bottom drawer interface with background scaling enabled
   - List of previous readings with timestamps
   - Click to navigate back to previous chapters
+  - Proper component usage: DialogClose for dialog section, DrawerClose for drawer section
+
+### Drawer Component
+- **Location**: `src/components/ui/drawer.tsx`
+- **Fix Applied**: Added proper shouldScaleBackground prop forwarding to DrawerPrimitive.Root
+- **Issue**: The shouldScaleBackground prop was not being passed through to the underlying vaul drawer component
+- **Solution**: Explicitly destructure and forward the shouldScaleBackground prop
 
 ## Hooks
 
@@ -70,3 +78,9 @@ Implementation of reading history functionality for the Bible app, allowing user
 - Clear history functionality
 - Proper TypeScript types
 - Internationalization support
+- Proper component usage (DialogClose vs DrawerClose)
+- Background scaling functionality for drawer on mobile
+
+## Bug Fixes Applied
+1. **Drawer Background Scaling**: Fixed shouldScaleBackground prop not being forwarded in drawer.tsx
+2. **Component Usage**: Fixed incorrect DialogClose usage in drawer section - should use DrawerClose

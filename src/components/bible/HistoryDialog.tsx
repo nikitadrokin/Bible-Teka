@@ -111,7 +111,7 @@ export function HistoryDialog() {
     );
 
   return (
-    <Drawer shouldScaleBackground>
+    <Drawer shouldScaleBackground={true}>
       <DrawerTrigger asChild>
         <Button variant='ghost' aria-label={t('readingHistory')}>
           <ClockIcon className='h-5 w-5' />
@@ -146,7 +146,7 @@ export function HistoryDialog() {
           ) : (
             <ul className='space-y-2'>
               {history.map((entry, index) => (
-                <DialogClose asChild key={index}>
+                <DrawerClose asChild key={index}>
                   <li>
                     <Button
                       variant='ghost'
@@ -163,7 +163,7 @@ export function HistoryDialog() {
                       </div>
                     </Button>
                   </li>
-                </DialogClose>
+                </DrawerClose>
               ))}
             </ul>
           )}
