@@ -30,3 +30,43 @@ alwaysApply: false
 - Style history entries as clickable buttons
 - Show timestamp in a smaller, muted text
 - Keep the UI clean and consistent with the rest of the application
+
+# History Feature Implementation
+
+## Overview
+Implementation of reading history functionality for the Bible app, allowing users to track and revisit previously read chapters.
+
+## Components
+
+### HistoryDialog
+- **Location**: `src/components/bible/HistoryDialog.tsx`
+- **Purpose**: Displays reading history in a responsive dialog/drawer
+- **Features**:
+  - Responsive design using useMediaQuery hook for desktop/mobile layouts
+  - Desktop: Modal dialog with clear history button
+  - Mobile: Bottom drawer interface
+  - List of previous readings with timestamps
+  - Click to navigate back to previous chapters
+
+## Hooks
+
+### useMediaQuery
+- **Location**: `src/hooks/use-media-query.ts`
+- **Purpose**: Provides responsive breakpoint detection
+- **Usage**: Returns boolean indicating if media query matches
+- **Implementation**: 
+  - Must return the matches state value
+  - Should properly handle media query change events
+  - Includes cleanup for event listeners
+
+## Store Integration
+- Uses `useHistoryStore` for history data management
+- Uses `useBible` context for navigation
+- Uses `useLocaleStore` for date formatting
+
+## Key Requirements
+- Responsive design with desktop dialog and mobile drawer
+- History items show book name, chapter, and formatted timestamp
+- Clear history functionality
+- Proper TypeScript types
+- Internationalization support
