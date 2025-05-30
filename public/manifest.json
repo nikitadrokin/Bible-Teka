@@ -33,7 +33,7 @@
   "start_url": ".",
   "display": "standalone",
   "theme_color": "#000000",
-  "background_color": "#decfb0",
+  "background_color": "oklch(0.91 0.048 83.6)",
   "orientation": "portrait",
   "description": "Audio Bible player for personal use",
   "apple-mobile-web-app-capable": "yes",
