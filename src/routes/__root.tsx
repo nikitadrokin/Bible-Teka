@@ -51,6 +51,14 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
         title: 'Bible Teka',
         description: 'Clone of Bible Teka for personal use',
       },
+      {
+        name: 'apple-mobile-web-app-capable',
+        content: 'yes',
+      },
+      {
+        name: 'apple-mobile-web-app-status-bar-style',
+        content: 'black-translucent',
+      },
     ],
     links: [
       {
