@@ -29,7 +29,7 @@ function BibleNavigator() {
   } = useBible();
 
   return (
-    <div className='app-container bg-background [@media(pointer:fine)]:p-8'>
+    <div className='app-container bg-background p-8'>
       <div className='mx-auto max-w-xl grid gap-y-8'>
         <div className='flex justify-between items-center'>
           <h1 className='text-3xl font-bold text-foreground inline-block'>
