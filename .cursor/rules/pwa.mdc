@@ -11,6 +11,7 @@ alwaysApply: false
 - Configure apple-mobile-web-app-capable and related properties
 - Link to the existing apple-touch-icon
 - Configure splash screen settings for iOS devices
+- Use apple-mobile-web-app-status-bar-style with "black-translucent" for paper notepad background visibility
 
 ## Audio Playback Features
 - Implement Media Session API for audio metadata on iOS and Android
@@ -18,3 +19,11 @@ alwaysApply: false
 - Configure media session action handlers for play, pause, and seek functionality
 - Update position state for accurate playback progress information
 - Support background audio playback in PWA mode
+
+## App-like Styling and Safe Area Handling
+- Set background color to #decfb0 (paper notepad theme color) on body/root element
+- Extend background outside safe areas for native app feel
+- Use CSS env() variables for safe area insets (safe-area-inset-top, safe-area-inset-bottom, safe-area-inset-left, safe-area-inset-right)
+- Apply proper padding to content areas while keeping background full-bleed
+- Maintain paper texture overlay for authentic notepad appearance
+- Ensure proper viewport-fit=cover meta tag for full-screen display
