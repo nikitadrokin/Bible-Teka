@@ -93,7 +93,7 @@ function RootDocument({ children }: { children: React.ReactNode }) {
       <head>
         <HeadContent />
       </head>
-      <body className='bg-background text-foreground app-container'>
+      <body className='bg-background text-foreground'>
         {children}
         <Scripts />
       </body>
