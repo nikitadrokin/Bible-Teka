@@ -21,7 +21,7 @@
 
 html {
   /* Set background on html for full coverage */
-  background-color: var(--background);
+  /* background-color: var(--background); */
   /* Allow natural overscroll behavior */
   overscroll-behavior: auto;
 }
