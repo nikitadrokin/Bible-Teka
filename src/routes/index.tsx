@@ -29,7 +29,7 @@ function BibleNavigator() {
   } = useBible();
 
   return (
-    <div className='app-container' data-vaul-drawer-wrapper>
+    <div className='app-container bg-background' data-vaul-drawer-wrapper>
       <div className='mx-auto max-w-xl grid gap-y-8 p-4 md:p-8'>
         <div className='flex justify-between items-center'>
           <h1 className='text-3xl font-bold text-foreground inline-block'>

@@ -111,7 +111,7 @@ export function HistoryDialog() {
     );
 
   return (
-    <Drawer shouldScaleBackground={true}>
+    <Drawer shouldScaleBackground>
       <DrawerTrigger asChild>
         <Button variant='ghost' aria-label={t('readingHistory')}>
           <ClockIcon className='h-5 w-5' />
