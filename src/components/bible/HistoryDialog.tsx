@@ -138,7 +138,7 @@ export function HistoryDialog() {
           </DrawerClose>
         </DrawerHeader>
 
-        <ScrollArea className='w-full pr-4 mt-4'>
+        <ScrollArea className='w-full pr-4 my-4'>
           {history.length === 0 ? (
             <p className='text-sm text-muted-foreground text-center py-8'>
               {t('noHistory')}
