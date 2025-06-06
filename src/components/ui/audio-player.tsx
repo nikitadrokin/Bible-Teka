@@ -73,6 +73,7 @@ export function AudioPlayer({
     duration: 0,
     currentSrc: '',
     loadStartTime: null as number | null,
+    iosLoadingTriggered: false,
   });
 
   const updateDebug = (updates: Partial<typeof debugInfo>) => {
@@ -125,6 +126,42 @@ export function AudioPlayer({
       );
     }
     return ranges.join(', ');
+  };
+
+  // iOS-specific loading trigger
+  const triggerIOSLoading = async (audio: HTMLAudioElement) => {
+    const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
+    if (!isIOS) return false;
+
+    updateDebug({
+      iosLoadingTriggered: true,
+      loadingState: 'triggering-ios-loading',
+      lastEvent: 'ios-loading-trigger',
+    });
+
+    try {
+      // Try to trigger loading by briefly starting and immediately pausing
+      const playPromise = audio.play();
+      if (playPromise) {
+        await playPromise;
+        audio.pause();
+        audio.currentTime = 0;
+
+        updateDebug({
+          loadingState: 'ios-loading-triggered',
+          lastEvent: 'ios-loading-success',
+        });
+        return true;
+      }
+    } catch (err) {
+      console.log('iOS loading trigger failed (expected):', err);
+      updateDebug({
+        lastEvent: 'ios-loading-failed',
+        autoplayError:
+          err instanceof Error ? err.message : 'iOS loading trigger failed',
+      });
+    }
+    return false;
   };
 
   const handlePlay = async () => {
@@ -256,6 +293,50 @@ export function AudioPlayer({
         duration: audio.duration,
       });
       updateAudioState('loadedmetadata');
+
+      // On iOS, trigger loading after metadata is loaded
+      const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
+      if (isIOS && !debugInfo.iosLoadingTriggered) {
+        // Wait a bit for iOS to settle, then trigger loading
+        setTimeout(async () => {
+          const loadingTriggered = await triggerIOSLoading(audio);
+          if (loadingTriggered) {
+            // After triggering loading, wait for canplaythrough and then auto-play
+            const waitForCanPlayThrough = () => {
+              if (audio.readyState >= 4) {
+                // Audio is ready, try autoplay
+                setTimeout(async () => {
+                  try {
+                    await audio.play();
+                    setIsPlaying(true);
+                    updateDebug({
+                      autoplayAttempted: true,
+                      autoplaySuccess: true,
+                      loadingState: 'playing',
+                      lastEvent: 'ios-autoplay-success',
+                    });
+                  } catch (err) {
+                    console.error('iOS auto-play failed:', err);
+                    updateDebug({
+                      autoplayAttempted: true,
+                      autoplayError:
+                        err instanceof Error
+                          ? err.message
+                          : 'iOS autoplay failed',
+                      autoplaySuccess: false,
+                      lastEvent: 'ios-autoplay-failed',
+                    });
+                  }
+                }, 500);
+              } else {
+                // Wait a bit more
+                setTimeout(waitForCanPlayThrough, 100);
+              }
+            };
+            waitForCanPlayThrough();
+          }
+        }, 1000);
+      }
     };
 
     const handleEnded = () => {
@@ -388,6 +469,7 @@ export function AudioPlayer({
       canPlay: false,
       canPlayThrough: false,
       lastEvent: 'src-changed',
+      iosLoadingTriggered: false,
     });
   }, [src]);
 
@@ -523,6 +605,9 @@ export function AudioPlayer({
           {debugInfo.loadStartTime
             ? new Date(debugInfo.loadStartTime).toLocaleTimeString()
             : 'N/A'}
+        </div>
+        <div>
+          iOS Loading Triggered: {debugInfo.iosLoadingTriggered ? 'Yes' : 'No'}
         </div>
       </div>
 
