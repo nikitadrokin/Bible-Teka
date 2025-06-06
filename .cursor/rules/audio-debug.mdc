@@ -1,0 +1,35 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Audio Player Debugging
+
+## Current Issue - SOLVED!
+- Audio player not auto-playing on iPhone Safari (website, not PWA)
+- **ROOT CAUSE**: iOS Safari stops loading audio after metadata to save bandwidth/battery
+- Only loads actual audio data when user explicitly triggers playback
+
+## Debug Implementation
+- Add debug paragraph above audio element in AudioPlayer component
+- Show audio loading states, autoplay attempts, and errors
+- Avoid prop drilling by keeping debug info internal to component
+- Display current audio state and browser autoplay policies
+
+## Technical Details
+- iOS has strict autoplay policies requiring user interaction
+- **KEY FINDING**: iOS stops at NETWORK_IDLE/HAVE_METADATA until manual play trigger
+- After manual play: progresses to HAVE_ENOUGH_DATA and buffers entire file
+- Need to programmatically trigger loading instead of waiting for auto-load
+
+## Solution Implementation
+- Detect when audio stops at metadata-loaded state on iOS
+- Programmatically trigger audio.load() or change preload strategy
+- Use iOS-friendly approach: trigger loading, then auto-play
+- Work with iOS behavior rather than against it
+
+## Next Steps
+- Add more granular debugging for audio loading events
+- Check network loading, buffering progress, and error states
+- Investigate iOS-specific audio loading restrictions
+- Monitor src changes and loading progression

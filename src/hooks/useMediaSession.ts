@@ -36,14 +36,16 @@ export function useMediaSession({
   const lastUpdateRef = useRef<number>(0);
 
   // Seek forward 10 seconds
-  const handleSeekForward = () => {
-    const newTime = Math.min(currentTime + 10, duration);
+  const handleSeekForward = (details: MediaSessionActionDetails) => {
+    const { seekOffset = 10 } = details;
+    const newTime = Math.min(currentTime + seekOffset, duration);
     onSeek(newTime);
   };
 
   // Seek backward 10 seconds
-  const handleSeekBackward = () => {
-    const newTime = Math.max(currentTime - 10, 0);
+  const handleSeekBackward = (details: MediaSessionActionDetails) => {
+    const { seekOffset = 10 } = details;
+    const newTime = Math.max(currentTime - seekOffset, 0);
     onSeek(newTime);
   };
 
