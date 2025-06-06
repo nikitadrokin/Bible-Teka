@@ -1,0 +1,50 @@
+---
+description: 
+globs: 
+alwaysApply: false
+---
+# Background Audio Playback for PWA - COMPLETED ✅
+
+## User Request
+Enable audio playback to continue when PWA is not focused or phone is locked, with next chapter functionality.
+
+## Media Session API Implementation ✅
+- ✅ Use Media Session API for background audio control
+- ✅ Show media metadata on lock screen and notification panel
+- ✅ Handle hardware media keys (play/pause/next/previous)
+- ✅ Continue audio playback when app loses focus
+- ✅ Display chapter information and Bible book artwork
+
+## Required Features ✅
+1. ✅ Set up Media Session metadata (title, artist, artwork)
+2. ✅ Configure action handlers (play, pause, nexttrack, previoustrack)
+3. ✅ Update playback position state
+4. ✅ Handle background audio permissions
+5. ✅ Integrate with existing audio player and chapter navigation
+
+## Technical Implementation Completed ✅
+- ✅ Created `useMediaSession` hook for Media Session integration
+- ✅ Extended AudioPlayer component with Media Session support
+- ✅ Uses `navigator.mediaSession` API with proper TypeScript types
+- ✅ Sets metadata when audio changes (chapter info)
+- ✅ Handles action callbacks to control playbook
+- ✅ Updates position state during playback (throttled)
+- ✅ PWA manifest already supports background audio capabilities
+
+## Bible-Specific Metadata ✅
+- ✅ Title: Chapter name (e.g., "Genesis 1")
+- ✅ Artist: "Bible Audio"
+- ✅ Album: Book name (e.g., "Genesis")
+- ✅ Artwork: App icons (192x192, 512x512)
+
+## Files Created/Modified ✅
+- ✅ `src/hooks/useMediaSession.ts` - Media Session hook
+- ✅ `src/components/ui/audio-player.tsx` - Enhanced with Media Session
+- ✅ `src/components/bible/AudioSection.tsx` - Passes book/chapter data
+
+## Features Working ✅
+- ✅ Lock screen controls show Bible chapter info
+- ✅ Hardware media keys control playback
+- ✅ Next track button advances to next chapter
+- ✅ Audio continues playing when app loses focus
+- ✅ Position updates in system media controls

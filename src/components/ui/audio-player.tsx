@@ -13,10 +13,16 @@ import {
 import { cn } from '@/lib/utils';
 import { Gauge, Pause, Play, Volume2, VolumeX } from 'lucide-react';
 import { useAudioStore } from '@/store/audio-store';
+import { useMediaSession } from '@/hooks/useMediaSession';
+import type { BibleBook } from '@/types/bible';
 
 interface AudioPlayerProps extends React.HTMLAttributes<HTMLDivElement> {
   src: string;
+  book?: BibleBook | null;
+  chapter?: number | null;
   onEnded?: () => void;
+  onNextTrack?: () => void;
+  onPreviousTrack?: () => void;
 }
 
 const PLAYBACK_SPEEDS = [
@@ -30,8 +36,12 @@ const PLAYBACK_SPEEDS = [
 
 export function AudioPlayer({
   src,
+  book,
+  chapter,
   className,
   onEnded,
+  onNextTrack,
+  onPreviousTrack,
   ...props
 }: AudioPlayerProps) {
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -44,6 +54,48 @@ export function AudioPlayer({
   const [error, setError] = useState<string | null>(null);
   const { playbackSpeed, setPlaybackSpeed } = useAudioStore();
   const [isScrubbing, setIsScrubbing] = useState(false);
+
+  const handlePlay = async () => {
+    if (!audioRef.current) return;
+    try {
+      await audioRef.current.play();
+      setIsPlaying(true);
+      setError(null);
+    } catch (err) {
+      console.error('Play error:', err);
+      setError('Failed to play audio. Please try again.');
+    }
+  };
+
+  const handlePause = async () => {
+    if (!audioRef.current) return;
+    try {
+      await audioRef.current.pause();
+      setIsPlaying(false);
+    } catch (err) {
+      console.error('Pause error:', err);
+    }
+  };
+
+  const handleSeek = (time: number) => {
+    if (!audioRef.current) return;
+    audioRef.current.currentTime = time;
+    setCurrentTime(time);
+  };
+
+  // Media Session integration
+  useMediaSession({
+    isPlaying,
+    currentTime,
+    duration,
+    book: book ?? null,
+    chapter: chapter ?? null,
+    onPlay: handlePlay,
+    onPause: handlePause,
+    onNextTrack: onNextTrack || (() => {}),
+    onPreviousTrack,
+    onSeek: handleSeek,
+  });
 
   useEffect(() => {
     const audio = audioRef.current;
@@ -139,20 +191,10 @@ export function AudioPlayer({
   }, []);
 
   const togglePlayPause = async () => {
-    if (!audioRef.current) return;
-
-    try {
-      if (isPlaying) {
-        await audioRef.current.pause();
-      } else {
-        await audioRef.current.play();
-      }
-      setIsPlaying(!isPlaying);
-      setError(null);
-    } catch (err) {
-      console.error('Playback error:', err);
-      setError('Failed to play audio. Please try again.');
-      setIsPlaying(false);
+    if (isPlaying) {
+      await handlePause();
+    } else {
+      await handlePlay();
     }
   };
 
