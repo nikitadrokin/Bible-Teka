@@ -21,8 +21,6 @@ interface AudioPlayerProps extends React.HTMLAttributes<HTMLDivElement> {
   book?: BibleBook | null;
   chapter?: number | null;
   onEnded?: () => void;
-  onNextTrack?: () => void;
-  onPreviousTrack?: () => void;
 }
 
 const PLAYBACK_SPEEDS = [
@@ -40,8 +38,6 @@ export function AudioPlayer({
   chapter,
   className,
   onEnded,
-  onNextTrack,
-  onPreviousTrack,
   ...props
 }: AudioPlayerProps) {
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -243,8 +239,6 @@ export function AudioPlayer({
     chapter: chapter ?? null,
     onPlay: handlePlay,
     onPause: handlePause,
-    onNextTrack: onNextTrack || (() => {}),
-    onPreviousTrack,
     onSeek: handleSeek,
   });
 

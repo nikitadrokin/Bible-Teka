@@ -1,0 +1,34 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Media Session Controls Update
+
+## Objective
+Update the media session hook to change button functionality from chapter navigation to seek controls.
+
+## Requirements
+- ✅ Change next/previous track buttons to seek forward/backward 15 seconds
+- ✅ Remove chapter navigation from media session controls
+- ✅ Maintain play/pause functionality
+- ✅ Update the useMediaSession hook interface to reflect new behavior
+
+## Implementation Details
+- ✅ Modify action handlers for 'nexttrack' and 'previoustrack' to use seek functionality
+- ✅ Update interface to remove onNextTrack/onPreviousTrack chapter navigation
+- ✅ Add seek forward/backward handlers that move audio position by 15 seconds
+- ✅ Ensure seek functionality works within audio duration bounds
+
+## Files Modified
+- ✅ src/hooks/useMediaSession.ts - Main hook implementation updated
+- ✅ src/components/ui/audio-player.tsx - Removed unused props and updated hook usage
+- ✅ src/components/bible/AudioSection.tsx - Removed onNextTrack prop usage
+
+## Changes Made
+1. Updated UseMediaSessionProps interface to remove onNextTrack and onPreviousTrack
+2. Made onSeek required instead of optional
+3. Added handleSeekForward and handleSeekBackward functions with 15-second increments
+4. Updated media session action handlers to use seek functionality
+5. Removed chapter navigation props from AudioPlayer component
+6. Updated AudioSection to not pass onNextTrack prop

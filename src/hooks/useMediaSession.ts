@@ -16,9 +16,7 @@ interface UseMediaSessionProps {
   chapter: number | null;
   onPlay: () => void;
   onPause: () => void;
-  onNextTrack: () => void;
-  onPreviousTrack?: () => void;
-  onSeek?: (time: number) => void;
+  onSeek: (time: number) => void;
 }
 
 export function useMediaSession({
@@ -29,11 +27,21 @@ export function useMediaSession({
   chapter,
   onPlay,
   onPause,
-  onNextTrack,
-  onPreviousTrack,
   onSeek,
 }: UseMediaSessionProps) {
   const lastUpdateRef = useRef<number>(0);
+
+  // Seek forward 15 seconds
+  const handleSeekForward = () => {
+    const newTime = Math.min(currentTime + 15, duration);
+    onSeek(newTime);
+  };
+
+  // Seek backward 15 seconds
+  const handleSeekBackward = () => {
+    const newTime = Math.max(currentTime - 15, 0);
+    onSeek(newTime);
+  };
 
   // Set up Media Session metadata when book/chapter changes
   useEffect(() => {
@@ -62,23 +70,18 @@ export function useMediaSession({
     const actionHandlers: [MediaSessionAction, MediaSessionActionHandler][] = [
       ['play', onPlay],
       ['pause', onPause],
-      ['nexttrack', onNextTrack],
+      ['seekbackward', handleSeekForward],
+      ['seekforward', handleSeekBackward],
     ];
 
-    if (onPreviousTrack) {
-      actionHandlers.push(['previoustrack', onPreviousTrack]);
-    }
-
-    if (onSeek) {
-      actionHandlers.push([
-        'seekto',
-        (details) => {
-          if (details.seekTime !== undefined) {
-            onSeek(details.seekTime);
-          }
-        },
-      ]);
-    }
+    actionHandlers.push([
+      'seekto',
+      (details) => {
+        if (details.seekTime !== undefined) {
+          onSeek(details.seekTime);
+        }
+      },
+    ]);
 
     // Set all action handlers
     actionHandlers.forEach(([action, handler]) => {
@@ -91,7 +94,7 @@ export function useMediaSession({
         navigator.mediaSession.setActionHandler(action, null);
       });
     };
-  }, [onPlay, onPause, onNextTrack, onPreviousTrack, onSeek]);
+  }, [onPlay, onPause, onSeek, currentTime, duration]);
 
   // Update playback state and position
   useEffect(() => {

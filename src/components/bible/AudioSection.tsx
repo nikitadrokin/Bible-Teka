@@ -55,7 +55,6 @@ export function AudioSection({
           chapter={selection.chapter}
           className='mt-4'
           onEnded={advanceToNextChapter}
-          onNextTrack={advanceToNextChapter}
         />
       )}
     </>
