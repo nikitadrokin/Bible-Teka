@@ -2,6 +2,7 @@ import * as React from 'react';
 import { Drawer as DrawerPrimitive } from 'vaul';
 
 import { cn } from '@/lib/utils';
+import { IS_SERVER } from '@/hooks/use-media-query';
 
 function Drawer({
   ...props
@@ -48,7 +49,8 @@ function DrawerContent({
   children,
   ...props
 }: React.ComponentProps<typeof DrawerPrimitive.Content>) {
-  const isStandalone = window.matchMedia('(display-mode: standalone)').matches;
+  const isStandalone =
+    !IS_SERVER && window.matchMedia('(display-mode: standalone)').matches;
 
   return (
     <DrawerPortal data-slot='drawer-portal'>

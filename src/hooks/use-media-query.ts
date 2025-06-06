@@ -7,7 +7,7 @@ type UseMediaQueryOptions = {
   initializeWithValue?: boolean;
 };
 
-const IS_SERVER = typeof window === 'undefined';
+export const IS_SERVER = typeof window === 'undefined';
 
 export function useMediaQuery(
   query: string,
