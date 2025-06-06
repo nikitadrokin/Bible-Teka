@@ -622,7 +622,7 @@ export function AudioPlayer({
             value={playbackSpeed.toString()}
             onValueChange={handleSpeedChange}
           >
-            <SelectTrigger className='h-8 w-28'>
+            <SelectTrigger className='h-8 w-28 gap-0'>
               <Gauge className='mr-2 h-3 w-3' />
               <SelectValue />
             </SelectTrigger>
