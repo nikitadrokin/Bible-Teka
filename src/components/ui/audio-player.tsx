@@ -21,6 +21,8 @@ interface AudioPlayerProps extends React.HTMLAttributes<HTMLDivElement> {
   book?: BibleBook | null;
   chapter?: number | null;
   onEnded?: () => void;
+  onNextTrack?: () => void;
+  onPreviousTrack?: () => void;
 }
 
 const PLAYBACK_SPEEDS = [
@@ -38,10 +40,11 @@ export function AudioPlayer({
   chapter,
   className,
   onEnded,
+  onNextTrack,
+  onPreviousTrack,
   ...props
 }: AudioPlayerProps) {
   const audioRef = useRef<HTMLAudioElement>(null);
-  const playButtonRef = useRef<HTMLButtonElement>(null);
   const autoPlayTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
@@ -71,13 +74,7 @@ export function AudioPlayer({
     currentSrc: '',
     loadStartTime: null as number | null,
     iosLoadingTriggered: false,
-    userInteractionCaptured: false,
-    autoplayBudgetAvailable: true,
   });
-
-  // Track user interaction for iOS autoplay budget
-  const userInteractionRef = useRef(false);
-  const autoplayAttemptCountRef = useRef(0);
 
   const updateDebug = (updates: Partial<typeof debugInfo>) => {
     setDebugInfo((prev) => ({
@@ -131,83 +128,44 @@ export function AudioPlayer({
     return ranges.join(', ');
   };
 
-  // Capture user interaction for autoplay budget
-  const captureUserInteraction = () => {
-    userInteractionRef.current = true;
-    autoplayAttemptCountRef.current = 0; // Reset attempt count on new interaction
-    updateDebug({
-      userInteractionCaptured: true,
-      autoplayBudgetAvailable: true,
-      lastEvent: 'user-interaction-captured',
-    });
-  };
-
-  // iOS-specific loading trigger using programmatic button click
-  const triggerIOSAutoplay = async () => {
+  // iOS-specific loading trigger
+  const triggerIOSLoading = async (audio: HTMLAudioElement) => {
     const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
     if (!isIOS) return false;
 
-    // Check if we have interaction budget
-    if (!userInteractionRef.current || autoplayAttemptCountRef.current >= 3) {
-      updateDebug({
-        autoplayBudgetAvailable: false,
-        lastEvent: 'autoplay-budget-exhausted',
-        autoplayError: 'No user interaction or budget exhausted',
-      });
-      return false;
-    }
-
-    // Check if play button ref is available
-    if (!playButtonRef.current) {
-      updateDebug({
-        lastEvent: 'play-button-ref-not-available',
-        autoplayError: 'Play button ref not available',
-      });
-      return false;
-    }
-
-    autoplayAttemptCountRef.current++;
     updateDebug({
       iosLoadingTriggered: true,
-      loadingState: 'attempting-ios-button-click',
-      lastEvent: `button-click-attempt-${autoplayAttemptCountRef.current}`,
+      loadingState: 'triggering-ios-loading',
+      lastEvent: 'ios-loading-trigger',
     });
 
     try {
-      // Programmatically click the play button instead of calling audio.play()
-      playButtonRef.current.click();
+      // Try to trigger loading by briefly starting and immediately pausing
+      const playPromise = audio.play();
+      if (playPromise) {
+        await playPromise;
+        audio.pause();
+        audio.currentTime = 0;
 
-      updateDebug({
-        autoplayAttempted: true,
-        autoplaySuccess: true,
-        loadingState: 'button-click-triggered',
-        lastEvent: 'ios-button-click-success',
-      });
-      return true;
-    } catch (err) {
-      console.error('iOS button click autoplay failed:', err);
-      updateDebug({
-        autoplayAttempted: true,
-        autoplayError:
-          err instanceof Error ? err.message : 'iOS button click failed',
-        autoplaySuccess: false,
-        lastEvent: 'ios-button-click-failed',
-      });
-
-      // If we've failed multiple times, assume budget is exhausted
-      if (autoplayAttemptCountRef.current >= 2) {
-        updateDebug({ autoplayBudgetAvailable: false });
+        updateDebug({
+          loadingState: 'ios-loading-triggered',
+          lastEvent: 'ios-loading-success',
+        });
+        return true;
       }
-      return false;
+    } catch (err) {
+      console.log('iOS loading trigger failed (expected):', err);
+      updateDebug({
+        lastEvent: 'ios-loading-failed',
+        autoplayError:
+          err instanceof Error ? err.message : 'iOS loading trigger failed',
+      });
     }
+    return false;
   };
 
   const handlePlay = async () => {
     if (!audioRef.current) return;
-
-    // Capture user interaction for iOS autoplay budget
-    captureUserInteraction();
-
     try {
       await audioRef.current.play();
       setIsPlaying(true);
@@ -334,12 +292,47 @@ export function AudioPlayer({
       });
       updateAudioState('loadedmetadata');
 
-      // On iOS, try autoplay if we have interaction budget
+      // On iOS, trigger loading after metadata is loaded
       const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
-      if (isIOS) {
-        // Wait a bit for iOS to settle, then try autoplay
+      if (isIOS && !debugInfo.iosLoadingTriggered) {
+        // Wait a bit for iOS to settle, then trigger loading
         setTimeout(async () => {
-          await triggerIOSAutoplay();
+          const loadingTriggered = await triggerIOSLoading(audio);
+          if (loadingTriggered) {
+            // After triggering loading, wait for canplaythrough and then auto-play
+            const waitForCanPlayThrough = () => {
+              if (audio.readyState >= 4) {
+                // Audio is ready, try autoplay
+                setTimeout(async () => {
+                  try {
+                    await audio.play();
+                    setIsPlaying(true);
+                    updateDebug({
+                      autoplayAttempted: true,
+                      autoplaySuccess: true,
+                      loadingState: 'playing',
+                      lastEvent: 'ios-autoplay-success',
+                    });
+                  } catch (err) {
+                    console.error('iOS auto-play failed:', err);
+                    updateDebug({
+                      autoplayAttempted: true,
+                      autoplayError:
+                        err instanceof Error
+                          ? err.message
+                          : 'iOS autoplay failed',
+                      autoplaySuccess: false,
+                      lastEvent: 'ios-autoplay-failed',
+                    });
+                  }
+                }, 500);
+              } else {
+                // Wait a bit more
+                setTimeout(waitForCanPlayThrough, 100);
+              }
+            };
+            waitForCanPlayThrough();
+          }
         }, 1000);
       }
     };
@@ -466,7 +459,6 @@ export function AudioPlayer({
   // Reset current time and debug info when src changes
   useEffect(() => {
     setCurrentTime(0);
-    // Don't reset user interaction on src change to preserve autoplay budget
     updateDebug({
       loadingState: 'loading-new-src',
       autoplayAttempted: false,
@@ -615,17 +607,6 @@ export function AudioPlayer({
         <div>
           iOS Loading Triggered: {debugInfo.iosLoadingTriggered ? 'Yes' : 'No'}
         </div>
-        <div>
-          User Interaction Captured:{' '}
-          {debugInfo.userInteractionCaptured ? 'Yes' : 'No'}
-        </div>
-        <div>
-          Autoplay Budget Available:{' '}
-          {debugInfo.autoplayBudgetAvailable ? 'Yes' : 'No'}
-        </div>
-        <div>Autoplay Attempts: {autoplayAttemptCountRef.current}</div>
-        <div>Play Button Available: {playButtonRef.current ? 'Yes' : 'No'}</div>
-        <div>Method: Programmatic Button Click (iOS Autoplay Workaround)</div>
       </div>
 
       <audio ref={audioRef} src={src} />
@@ -682,7 +663,6 @@ export function AudioPlayer({
       {/* Second row - Media player controls */}
       <div className='flex items-center justify-between'>
         <Button
-          ref={playButtonRef}
           variant='ghost'
           size='icon'
           onClick={togglePlayPause}
