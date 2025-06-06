@@ -1,5 +1,6 @@
 import { useEffect, useRef } from 'react';
 import type { BibleBook } from '@/types/bible';
+import { useTranslation } from 'react-i18next';
 
 interface MediaSessionMetadata {
   title: string;
@@ -29,17 +30,20 @@ export function useMediaSession({
   onPause,
   onSeek,
 }: UseMediaSessionProps) {
+  const { t } = useTranslation();
+  const artist = t('appTitle');
+
   const lastUpdateRef = useRef<number>(0);
 
-  // Seek forward 15 seconds
+  // Seek forward 10 seconds
   const handleSeekForward = () => {
-    const newTime = Math.min(currentTime + 15, duration);
+    const newTime = Math.min(currentTime + 10, duration);
     onSeek(newTime);
   };
 
-  // Seek backward 15 seconds
+  // Seek backward 10 seconds
   const handleSeekBackward = () => {
-    const newTime = Math.max(currentTime - 15, 0);
+    const newTime = Math.max(currentTime - 10, 0);
     onSeek(newTime);
   };
 
@@ -49,7 +53,7 @@ export function useMediaSession({
 
     const metadata: MediaSessionMetadata = {
       title: `${book.name} ${chapter}`,
-      artist: 'Bible Audio',
+      artist,
       album: book.name,
       artwork: [
         {
@@ -70,8 +74,8 @@ export function useMediaSession({
     const actionHandlers: [MediaSessionAction, MediaSessionActionHandler][] = [
       ['play', onPlay],
       ['pause', onPause],
-      ['seekbackward', handleSeekForward],
-      ['seekforward', handleSeekBackward],
+      ['seekbackward', handleSeekBackward],
+      ['seekforward', handleSeekForward],
     ];
 
     actionHandlers.push([
