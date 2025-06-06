@@ -35,6 +35,7 @@ export function AudioPlayer({
   ...props
 }: AudioPlayerProps) {
   const audioRef = useRef<HTMLAudioElement>(null);
+  const autoPlayTimeoutRef = useRef<NodeJS.Timeout | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -56,19 +57,43 @@ export function AudioPlayer({
     };
 
     const handleLoadedMetadata = () => setDuration(audio.duration);
+
     const handleEnded = () => {
       setIsPlaying(false);
       if (onEnded) {
         onEnded();
       }
     };
+
     const handleError = (e: ErrorEvent) => {
       console.error('Audio playback error:', e);
       setError('Failed to play audio. Please try again.');
       setIsPlaying(false);
     };
+
     const handleCanPlay = () => {
       setError(null);
+    };
+
+    // Auto-play when audio finishes loading
+    const handleCanPlayThrough = () => {
+      // Clear any existing timeout
+      if (autoPlayTimeoutRef.current) {
+        clearTimeout(autoPlayTimeoutRef.current);
+      }
+
+      // Auto-play after 500ms delay
+      autoPlayTimeoutRef.current = setTimeout(async () => {
+        try {
+          await audio.play();
+          setIsPlaying(true);
+          setError(null);
+        } catch (err) {
+          console.error('Auto-play failed:', err);
+          // Don't set error here as it might be due to browser autoplay policy
+          // User can still click play manually
+        }
+      }, 500);
     };
 
     audio.addEventListener('timeupdate', handleTimeUpdate);
@@ -76,6 +101,7 @@ export function AudioPlayer({
     audio.addEventListener('ended', handleEnded);
     audio.addEventListener('error', handleError);
     audio.addEventListener('canplay', handleCanPlay);
+    audio.addEventListener('canplaythrough', handleCanPlayThrough);
 
     // Set initial playback speed from store
     audio.playbackRate = playbackSpeed;
@@ -84,49 +110,33 @@ export function AudioPlayer({
     audio.preload = 'metadata';
 
     return () => {
+      // Clear timeout on cleanup
+      if (autoPlayTimeoutRef.current) {
+        clearTimeout(autoPlayTimeoutRef.current);
+      }
+
       audio.removeEventListener('timeupdate', handleTimeUpdate);
       audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
       audio.removeEventListener('ended', handleEnded);
       audio.removeEventListener('error', handleError);
       audio.removeEventListener('canplay', handleCanPlay);
+      audio.removeEventListener('canplaythrough', handleCanPlayThrough);
     };
   }, [playbackSpeed, onEnded, isScrubbing]);
 
-  // Auto-play when src changes
+  // Reset current time when src changes
   useEffect(() => {
-    const audio = audioRef.current;
-    if (!audio) return;
-
-    // Reset current time when src changes
     setCurrentTime(0);
+  }, [src]);
 
-    // Attempt to play audio when src changes
-    const playAudio = async () => {
-      try {
-        await audio.play();
-        setIsPlaying(true);
-        setError(null);
-      } catch (err) {
-        console.error('Auto-play failed:', err);
-        // Don't set error here as it might be due to browser autoplay policy
-        // User can still click play manually
+  // Clean up timeout on unmount
+  useEffect(() => {
+    return () => {
+      if (autoPlayTimeoutRef.current) {
+        clearTimeout(autoPlayTimeoutRef.current);
       }
     };
-
-    // Audio needs to be loaded before we can play it
-    const handleCanPlayAutoPlay = () => {
-      playAudio();
-      // Remove event listener after first trigger
-      audio.removeEventListener('canplaythrough', handleCanPlayAutoPlay);
-    };
-
-    audio.addEventListener('canplaythrough', handleCanPlayAutoPlay);
-
-    // Clean up
-    return () => {
-      audio.removeEventListener('canplaythrough', handleCanPlayAutoPlay);
-    };
-  }, [src]);
+  }, []);
 
   const togglePlayPause = async () => {
     if (!audioRef.current) return;
