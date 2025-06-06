@@ -14,10 +14,24 @@ interface HistoryStore {
 
 const MAX_HISTORY_ITEMS = 20;
 
+const isDev = import.meta.env.DEV;
+
+const history = isDev
+  ? (Array.from({ length: 20 }, (_, i) => ({
+      book: {
+        id: i,
+        name: `Preset`,
+        chapters: 10,
+      },
+      chapter: i,
+      timestamp: Date.now(),
+    })) satisfies HistoryEntry[])
+  : [];
+
 export const useHistoryStore = create<HistoryStore>()(
   persist(
     (set) => ({
-      history: [],
+      history,
       addToHistory: (selection) => {
         if (!selection.book || !selection.chapter) return;
 
