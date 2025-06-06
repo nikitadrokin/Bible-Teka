@@ -1,0 +1,21 @@
+---
+description:
+globs:
+alwaysApply: false
+---
+# Audio Player Debugging
+
+## Current Issue
+- Audio player not auto-playing on iPhone Safari (website, not PWA)
+- Need debugging statements to diagnose iOS autoplay policy issues
+
+## Debug Implementation
+- Add debug paragraph above audio element in AudioPlayer component
+- Show audio loading states, autoplay attempts, and errors
+- Avoid prop drilling by keeping debug info internal to component
+- Display current audio state and browser autoplay policies
+
+## Technical Details
+- iOS has strict autoplay policies requiring user interaction
+- Need to track canplaythrough events and autoplay failures
+- Show real-time status of audio loading and playback attempts

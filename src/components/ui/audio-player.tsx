@@ -55,15 +55,43 @@ export function AudioPlayer({
   const { playbackSpeed, setPlaybackSpeed } = useAudioStore();
   const [isScrubbing, setIsScrubbing] = useState(false);
 
+  // Debug states
+  const [debugInfo, setDebugInfo] = useState({
+    loadingState: 'initial',
+    autoplayAttempted: false,
+    autoplaySuccess: false,
+    autoplayError: null as string | null,
+    canPlay: false,
+    canPlayThrough: false,
+    userAgent:
+      typeof navigator !== 'undefined' ? navigator.userAgent : 'unknown',
+    lastEvent: 'none',
+    timestamp: new Date().toLocaleTimeString(),
+  });
+
+  const updateDebug = (updates: Partial<typeof debugInfo>) => {
+    setDebugInfo((prev) => ({
+      ...prev,
+      ...updates,
+      timestamp: new Date().toLocaleTimeString(),
+    }));
+  };
+
   const handlePlay = async () => {
     if (!audioRef.current) return;
     try {
       await audioRef.current.play();
       setIsPlaying(true);
       setError(null);
+      updateDebug({ autoplaySuccess: true, lastEvent: 'manual-play-success' });
     } catch (err) {
       console.error('Play error:', err);
       setError('Failed to play audio. Please try again.');
+      updateDebug({
+        autoplayError:
+          err instanceof Error ? err.message : 'Unknown play error',
+        lastEvent: 'manual-play-error',
+      });
     }
   };
 
@@ -72,6 +100,7 @@ export function AudioPlayer({
     try {
       await audioRef.current.pause();
       setIsPlaying(false);
+      updateDebug({ lastEvent: 'pause' });
     } catch (err) {
       console.error('Pause error:', err);
     }
@@ -101,6 +130,11 @@ export function AudioPlayer({
     const audio = audioRef.current;
     if (!audio) return;
 
+    updateDebug({
+      loadingState: 'setting-up-listeners',
+      lastEvent: 'setup-start',
+    });
+
     const handleTimeUpdate = () => {
       // Only update current time if user is not scrubbing
       if (!isScrubbing) {
@@ -108,10 +142,17 @@ export function AudioPlayer({
       }
     };
 
-    const handleLoadedMetadata = () => setDuration(audio.duration);
+    const handleLoadedMetadata = () => {
+      setDuration(audio.duration);
+      updateDebug({
+        loadingState: 'metadata-loaded',
+        lastEvent: 'loadedmetadata',
+      });
+    };
 
     const handleEnded = () => {
       setIsPlaying(false);
+      updateDebug({ lastEvent: 'ended' });
       if (onEnded) {
         onEnded();
       }
@@ -121,14 +162,30 @@ export function AudioPlayer({
       console.error('Audio playback error:', e);
       setError('Failed to play audio. Please try again.');
       setIsPlaying(false);
+      updateDebug({
+        loadingState: 'error',
+        autoplayError: 'Audio error event',
+        lastEvent: 'error',
+      });
     };
 
     const handleCanPlay = () => {
       setError(null);
+      updateDebug({
+        canPlay: true,
+        loadingState: 'can-play',
+        lastEvent: 'canplay',
+      });
     };
 
     // Auto-play when audio finishes loading
     const handleCanPlayThrough = () => {
+      updateDebug({
+        canPlayThrough: true,
+        loadingState: 'can-play-through',
+        lastEvent: 'canplaythrough',
+      });
+
       // Clear any existing timeout
       if (autoPlayTimeoutRef.current) {
         clearTimeout(autoPlayTimeoutRef.current);
@@ -136,12 +193,28 @@ export function AudioPlayer({
 
       // Auto-play after 500ms delay
       autoPlayTimeoutRef.current = setTimeout(async () => {
+        updateDebug({
+          autoplayAttempted: true,
+          lastEvent: 'autoplay-attempt',
+        });
+
         try {
           await audio.play();
           setIsPlaying(true);
           setError(null);
+          updateDebug({
+            autoplaySuccess: true,
+            loadingState: 'playing',
+            lastEvent: 'autoplay-success',
+          });
         } catch (err) {
           console.error('Auto-play failed:', err);
+          updateDebug({
+            autoplayError:
+              err instanceof Error ? err.message : 'Unknown autoplay error',
+            autoplaySuccess: false,
+            lastEvent: 'autoplay-failed',
+          });
           // Don't set error here as it might be due to browser autoplay policy
           // User can still click play manually
         }
@@ -176,9 +249,18 @@ export function AudioPlayer({
     };
   }, [playbackSpeed, onEnded, isScrubbing]);
 
-  // Reset current time when src changes
+  // Reset current time and debug info when src changes
   useEffect(() => {
     setCurrentTime(0);
+    updateDebug({
+      loadingState: 'loading-new-src',
+      autoplayAttempted: false,
+      autoplaySuccess: false,
+      autoplayError: null,
+      canPlay: false,
+      canPlayThrough: false,
+      lastEvent: 'src-changed',
+    });
   }, [src]);
 
   // Clean up timeout on unmount
@@ -274,6 +356,30 @@ export function AudioPlayer({
       )}
       {...props}
     >
+      {/* Debug Information */}
+      <div className='bg-gray-100 dark:bg-gray-800 p-3 rounded text-xs font-mono'>
+        <div className='font-bold mb-2'>
+          Audio Debug Info ({debugInfo.timestamp})
+        </div>
+        <div>Loading State: {debugInfo.loadingState}</div>
+        <div>Last Event: {debugInfo.lastEvent}</div>
+        <div>Can Play: {debugInfo.canPlay ? 'Yes' : 'No'}</div>
+        <div>Can Play Through: {debugInfo.canPlayThrough ? 'Yes' : 'No'}</div>
+        <div>
+          Autoplay Attempted: {debugInfo.autoplayAttempted ? 'Yes' : 'No'}
+        </div>
+        <div>Autoplay Success: {debugInfo.autoplaySuccess ? 'Yes' : 'No'}</div>
+        {debugInfo.autoplayError && (
+          <div className='text-red-600'>
+            Autoplay Error: {debugInfo.autoplayError}
+          </div>
+        )}
+        <div className='mt-2 text-gray-600 dark:text-gray-400'>
+          User Agent:{' '}
+          {debugInfo.userAgent.includes('iPhone') ? 'iPhone' : 'Other'}
+        </div>
+      </div>
+
       <audio ref={audioRef} src={src} />
 
       {error && (
