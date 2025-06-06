@@ -67,6 +67,12 @@ export function AudioPlayer({
       typeof navigator !== 'undefined' ? navigator.userAgent : 'unknown',
     lastEvent: 'none',
     timestamp: new Date().toLocaleTimeString(),
+    networkState: 'unknown',
+    readyState: 'unknown',
+    bufferedRanges: 'none',
+    duration: 0,
+    currentSrc: '',
+    loadStartTime: null as number | null,
   });
 
   const updateDebug = (updates: Partial<typeof debugInfo>) => {
@@ -75,6 +81,50 @@ export function AudioPlayer({
       ...updates,
       timestamp: new Date().toLocaleTimeString(),
     }));
+  };
+
+  const getNetworkStateText = (state: number) => {
+    switch (state) {
+      case 0:
+        return 'NETWORK_EMPTY';
+      case 1:
+        return 'NETWORK_IDLE';
+      case 2:
+        return 'NETWORK_LOADING';
+      case 3:
+        return 'NETWORK_NO_SOURCE';
+      default:
+        return `UNKNOWN(${state})`;
+    }
+  };
+
+  const getReadyStateText = (state: number) => {
+    switch (state) {
+      case 0:
+        return 'HAVE_NOTHING';
+      case 1:
+        return 'HAVE_METADATA';
+      case 2:
+        return 'HAVE_CURRENT_DATA';
+      case 3:
+        return 'HAVE_FUTURE_DATA';
+      case 4:
+        return 'HAVE_ENOUGH_DATA';
+      default:
+        return `UNKNOWN(${state})`;
+    }
+  };
+
+  const getBufferedRanges = (audio: HTMLAudioElement) => {
+    const buffered = audio.buffered;
+    if (buffered.length === 0) return 'none';
+    const ranges = [];
+    for (let i = 0; i < buffered.length; i++) {
+      ranges.push(
+        `${buffered.start(i).toFixed(1)}-${buffered.end(i).toFixed(1)}`,
+      );
+    }
+    return ranges.join(', ');
   };
 
   const handlePlay = async () => {
@@ -133,7 +183,63 @@ export function AudioPlayer({
     updateDebug({
       loadingState: 'setting-up-listeners',
       lastEvent: 'setup-start',
+      currentSrc: audio.src,
+      loadStartTime: Date.now(),
     });
+
+    const updateAudioState = (eventName: string) => {
+      updateDebug({
+        lastEvent: eventName,
+        networkState: getNetworkStateText(audio.networkState),
+        readyState: getReadyStateText(audio.readyState),
+        bufferedRanges: getBufferedRanges(audio),
+        duration: audio.duration || 0,
+      });
+    };
+
+    const handleLoadStart = () => {
+      updateDebug({
+        loadingState: 'load-started',
+        lastEvent: 'loadstart',
+        loadStartTime: Date.now(),
+      });
+      updateAudioState('loadstart');
+    };
+
+    const handleLoadedData = () => {
+      updateDebug({
+        loadingState: 'data-loaded',
+        lastEvent: 'loadeddata',
+      });
+      updateAudioState('loadeddata');
+    };
+
+    const handleProgress = () => {
+      updateAudioState('progress');
+    };
+
+    const handleSuspend = () => {
+      updateDebug({
+        loadingState: 'suspended',
+        lastEvent: 'suspend',
+      });
+      updateAudioState('suspend');
+    };
+
+    const handleStalled = () => {
+      updateDebug({
+        loadingState: 'stalled',
+        lastEvent: 'stalled',
+      });
+      updateAudioState('stalled');
+    };
+
+    const handleWaiting = () => {
+      updateDebug({
+        lastEvent: 'waiting',
+      });
+      updateAudioState('waiting');
+    };
 
     const handleTimeUpdate = () => {
       // Only update current time if user is not scrubbing
@@ -147,7 +253,9 @@ export function AudioPlayer({
       updateDebug({
         loadingState: 'metadata-loaded',
         lastEvent: 'loadedmetadata',
+        duration: audio.duration,
       });
+      updateAudioState('loadedmetadata');
     };
 
     const handleEnded = () => {
@@ -158,15 +266,20 @@ export function AudioPlayer({
       }
     };
 
-    const handleError = (e: ErrorEvent) => {
-      console.error('Audio playback error:', e);
+    const handleError = (e: Event) => {
+      const target = e.target as HTMLAudioElement;
+      const error = target.error;
+      console.error('Audio playback error:', error);
       setError('Failed to play audio. Please try again.');
       setIsPlaying(false);
       updateDebug({
         loadingState: 'error',
-        autoplayError: 'Audio error event',
+        autoplayError: error
+          ? `${error.code}: ${error.message}`
+          : 'Audio error event',
         lastEvent: 'error',
       });
+      updateAudioState('error');
     };
 
     const handleCanPlay = () => {
@@ -176,6 +289,7 @@ export function AudioPlayer({
         loadingState: 'can-play',
         lastEvent: 'canplay',
       });
+      updateAudioState('canplay');
     };
 
     // Auto-play when audio finishes loading
@@ -185,6 +299,7 @@ export function AudioPlayer({
         loadingState: 'can-play-through',
         lastEvent: 'canplaythrough',
       });
+      updateAudioState('canplaythrough');
 
       // Clear any existing timeout
       if (autoPlayTimeoutRef.current) {
@@ -221,6 +336,13 @@ export function AudioPlayer({
       }, 500);
     };
 
+    // Add all event listeners
+    audio.addEventListener('loadstart', handleLoadStart);
+    audio.addEventListener('loadeddata', handleLoadedData);
+    audio.addEventListener('progress', handleProgress);
+    audio.addEventListener('suspend', handleSuspend);
+    audio.addEventListener('stalled', handleStalled);
+    audio.addEventListener('waiting', handleWaiting);
     audio.addEventListener('timeupdate', handleTimeUpdate);
     audio.addEventListener('loadedmetadata', handleLoadedMetadata);
     audio.addEventListener('ended', handleEnded);
@@ -240,6 +362,12 @@ export function AudioPlayer({
         clearTimeout(autoPlayTimeoutRef.current);
       }
 
+      audio.removeEventListener('loadstart', handleLoadStart);
+      audio.removeEventListener('loadeddata', handleLoadedData);
+      audio.removeEventListener('progress', handleProgress);
+      audio.removeEventListener('suspend', handleSuspend);
+      audio.removeEventListener('stalled', handleStalled);
+      audio.removeEventListener('waiting', handleWaiting);
       audio.removeEventListener('timeupdate', handleTimeUpdate);
       audio.removeEventListener('loadedmetadata', handleLoadedMetadata);
       audio.removeEventListener('ended', handleEnded);
@@ -377,6 +505,24 @@ export function AudioPlayer({
         <div className='mt-2 text-gray-600 dark:text-gray-400'>
           User Agent:{' '}
           {debugInfo.userAgent.includes('iPhone') ? 'iPhone' : 'Other'}
+        </div>
+        <div>
+          Network State:{' '}
+          {getNetworkStateText(audioRef.current?.networkState || 0)}
+        </div>
+        <div>
+          Ready State: {getReadyStateText(audioRef.current?.readyState || 0)}
+        </div>
+        <div>
+          Buffered Ranges: {getBufferedRanges(audioRef.current || new Audio())}
+        </div>
+        <div>Duration: {debugInfo.duration.toFixed(2)} seconds</div>
+        <div>Current Source: {debugInfo.currentSrc}</div>
+        <div>
+          Load Start Time:{' '}
+          {debugInfo.loadStartTime
+            ? new Date(debugInfo.loadStartTime).toLocaleTimeString()
+            : 'N/A'}
         </div>
       </div>
 

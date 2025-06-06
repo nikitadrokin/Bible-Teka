@@ -1,13 +1,14 @@
 ---
-description:
-globs:
+description: 
+globs: 
 alwaysApply: false
 ---
 # Audio Player Debugging
 
 ## Current Issue
 - Audio player not auto-playing on iPhone Safari (website, not PWA)
-- Need debugging statements to diagnose iOS autoplay policy issues
+- **DIAGNOSIS**: Audio gets stuck at "metadata-loaded" state and never reaches "canplay"
+- This prevents autoplay from even being attempted
 
 ## Debug Implementation
 - Add debug paragraph above audio element in AudioPlayer component
@@ -19,3 +20,10 @@ alwaysApply: false
 - iOS has strict autoplay policies requiring user interaction
 - Need to track canplaythrough events and autoplay failures
 - Show real-time status of audio loading and playback attempts
+- **FINDING**: Audio loading stops after metadata, never reaches canplay state
+
+## Next Steps
+- Add more granular debugging for audio loading events
+- Check network loading, buffering progress, and error states
+- Investigate iOS-specific audio loading restrictions
+- Monitor src changes and loading progression
