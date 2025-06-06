@@ -1,6 +1,7 @@
 import { useEffect, useRef } from 'react';
 import type { BibleBook } from '@/types/bible';
 import { useTranslation } from 'react-i18next';
+import { useWakeLock } from './useWakeLock';
 
 interface MediaSessionMetadata {
   title: string;
@@ -34,6 +35,9 @@ export function useMediaSession({
   const artist = t('appTitle');
 
   const lastUpdateRef = useRef<number>(0);
+
+  // Wake lock to prevent screen sleep during playback
+  const { request: requestWakeLock, release: releaseWakeLock } = useWakeLock();
 
   // Seek forward 10 seconds
   const handleSeekForward = (details: MediaSessionActionDetails) => {
@@ -108,6 +112,15 @@ export function useMediaSession({
 
     navigator.mediaSession.playbackState = isPlaying ? 'playing' : 'paused';
   }, [isPlaying]);
+
+  // Handle wake lock based on playing state
+  useEffect(() => {
+    if (isPlaying) {
+      requestWakeLock();
+    } else {
+      releaseWakeLock();
+    }
+  }, [isPlaying, requestWakeLock, releaseWakeLock]);
 
   // Update position state (throttled to avoid too many updates)
   useEffect(() => {
