@@ -565,7 +565,7 @@ export function AudioPlayer({
       {...props}
     >
       {/* Debug Information */}
-      <div className='bg-gray-100 dark:bg-gray-800 p-3 rounded text-xs font-mono'>
+      {/* <div className='bg-gray-100 dark:bg-gray-800 p-3 rounded text-xs font-mono'>
         <div className='font-bold mb-2'>
           Audio Debug Info ({debugInfo.timestamp})
         </div>
@@ -607,7 +607,7 @@ export function AudioPlayer({
         <div>
           iOS Loading Triggered: {debugInfo.iosLoadingTriggered ? 'Yes' : 'No'}
         </div>
-      </div>
+      </div> */}
 
       <audio ref={audioRef} src={src} />
 
