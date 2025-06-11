@@ -5,6 +5,7 @@ import { useLocaleStore } from '@/store/locale-store';
 import { formatDateTime } from '@/lib/utils';
 import { useHistoryStore } from '@/store/history-store';
 import type { HistoryEntry } from '@/store/history-store';
+import { bibleBooksEnglish, bibleBooksRussian } from '@/data/bible';
 import {
   Dialog,
   DialogClose,
@@ -33,12 +34,15 @@ export function HistoryDialog() {
   const { history, clearHistory } = useHistoryStore();
   const { t } = useTranslation();
 
+  const books = locale === 'en' ? bibleBooksEnglish : bibleBooksRussian;
   const isDesktop = useMediaQuery('(min-width: 768px)');
 
   const handleSelectHistoryItem = (entry: HistoryEntry) => {
-    if (entry.book && entry.chapter) {
+    // Find the book in the current locale using the stored book ID
+    const book = books.find((b) => b.id === entry.bookId);
+    if (book && entry.chapter) {
       setSelection({
-        book: entry.book,
+        book: book,
         chapter: entry.chapter,
       });
     }
@@ -46,6 +50,11 @@ export function HistoryDialog() {
 
   const getFormattedDate = (timestamp: number) => {
     return formatDateTime(new Date(timestamp), locale);
+  };
+
+  const getBookName = (bookId: number) => {
+    const book = books.find((b) => b.id === bookId);
+    return book?.name || '';
   };
 
   if (isDesktop)
@@ -93,7 +102,7 @@ export function HistoryDialog() {
                       >
                         <div>
                           <div className='font-medium'>
-                            {entry.book?.name} {entry.chapter}
+                            {getBookName(entry.bookId)} {entry.chapter}
                           </div>
                           <div className='text-xs text-muted-foreground'>
                             {getFormattedDate(entry.timestamp)}
@@ -155,7 +164,7 @@ export function HistoryDialog() {
                     >
                       <div>
                         <div className='font-medium'>
-                          {entry.book?.name} {entry.chapter}
+                          {getBookName(entry.bookId)} {entry.chapter}
                         </div>
                         <div className='text-xs text-muted-foreground'>
                           {getFormattedDate(entry.timestamp)}

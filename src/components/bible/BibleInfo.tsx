@@ -2,6 +2,7 @@ import type { BibleBook } from '@/types/bible';
 import { useBible } from './BibleContext';
 import { cn } from '@/lib/utils';
 import { BookOpenIcon } from 'lucide-react';
+import { Skeleton } from '../ui/skeleton';
 
 interface BibleInfoProps {
   book: BibleBook | null;
@@ -11,7 +12,7 @@ export function BibleInfo({ book }: BibleInfoProps) {
   const { selection } = useBible();
 
   if (!book || !selection.chapter) {
-    return null;
+    return <Skeleton className='h-8 w-36' />;
   }
 
   return (

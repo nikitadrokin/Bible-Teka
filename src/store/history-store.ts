@@ -1,14 +1,26 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { BibleBookSelection } from '@/types/bible';
+import { useLocaleStore } from './locale-store';
 
-export type HistoryEntry = BibleBookSelection & {
+export type HistoryEntry = {
+  locale: string;
+  bookId: number;
+  chapter: number;
   timestamp: number;
+};
+
+export type LastListenedChapter = {
+  locale: string;
+  bookId: number;
+  chapter: number;
 };
 
 interface HistoryStore {
   history: HistoryEntry[];
+  lastListenedChapter: LastListenedChapter | null;
   addToHistory: (selection: BibleBookSelection) => void;
+  setLastListenedChapter: (selection: BibleBookSelection) => void;
   clearHistory: () => void;
 }
 
@@ -18,34 +30,43 @@ const isDev = import.meta.env.DEV;
 
 const history = isDev
   ? (Array.from({ length: 20 }, (_, i) => ({
-      book: {
-        id: i,
-        name: `Preset`,
-        chapters: 10,
-      },
-      chapter: i,
+      locale: 'ru',
+      bookId: i,
+      chapter: i + 1,
       timestamp: Date.now(),
     })) satisfies HistoryEntry[])
   : [];
 
 export const useHistoryStore = create<HistoryStore>()(
   persist(
-    (set) => ({
+    (set, get) => ({
       history,
+      lastListenedChapter: get()?.history[0] || null,
       addToHistory: (selection) => {
-        if (!selection.book || !selection.chapter) return;
+        // Only add to history if both stores have hydrated and selection is valid
+        if (
+          !useHistoryStore.persist.hasHydrated() ||
+          !useLocaleStore.persist.hasHydrated() ||
+          !selection.book ||
+          !selection.chapter
+        )
+          return;
+
+        const locale = useLocaleStore.getState().locale;
 
         set((state) => {
           // Create a new history entry with timestamp
           const newEntry: HistoryEntry = {
-            ...selection,
+            locale,
+            bookId: selection.book!.id,
+            chapter: selection.chapter!,
             timestamp: Date.now(),
           };
 
           // Filter out any existing entries with the same book and chapter
           const filteredHistory = state.history.filter(
             (entry) =>
-              entry.book?.id !== selection.book?.id ||
+              entry.bookId !== selection.book?.id ||
               entry.chapter !== selection.chapter,
           );
 
@@ -55,7 +76,27 @@ export const useHistoryStore = create<HistoryStore>()(
           };
         });
       },
-      clearHistory: () => set({ history: [] }),
+      setLastListenedChapter: (selection) => {
+        // Only update if both stores have hydrated and selection is valid
+        if (
+          !useHistoryStore.persist.hasHydrated() ||
+          !useLocaleStore.persist.hasHydrated() ||
+          !selection.book ||
+          !selection.chapter
+        )
+          return;
+
+        const locale = useLocaleStore.getState().locale;
+
+        set({
+          lastListenedChapter: {
+            locale,
+            bookId: selection.book.id,
+            chapter: selection.chapter,
+          },
+        });
+      },
+      clearHistory: () => set({ history: [], lastListenedChapter: null }),
     }),
     {
       name: 'bible-teka-reading-history',

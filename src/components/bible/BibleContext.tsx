@@ -35,30 +35,43 @@ const BibleContext = createContext<BibleContextProps | undefined>(undefined);
 export function BibleProvider({ children }: { children: ReactNode }) {
   const { locale } = useLocaleStore();
   const books = locale === 'en' ? bibleBooksEnglish : bibleBooksRussian;
-  const { history, addToHistory } = useHistoryStore();
+  const { history, lastListenedChapter, addToHistory, setLastListenedChapter } =
+    useHistoryStore();
 
-  // Initialize with the most recent history item or default to Genesis 1
-  const [selection, setSelection] = useState<BibleBookSelection>(() => {
-    const mostRecent = history[0];
-    // Check if mostRecent exists and has valid book and chapter
-    if (mostRecent && mostRecent.book && mostRecent.chapter) {
-      // Find the book in the current locale
-      const bookInCurrentLocale = books.find(
-        (book) => book.id === mostRecent.book?.id,
-      );
-      if (bookInCurrentLocale) {
-        return {
-          book: bookInCurrentLocale,
-          chapter: mostRecent.chapter,
-        };
+  // Initialize with default selection (will be updated after hydration)
+  const [selection, setSelection] = useState<BibleBookSelection>(() => ({
+    book: lastListenedChapter?.bookId
+      ? books[lastListenedChapter.bookId]
+      : null,
+    chapter: lastListenedChapter?.chapter || 1,
+  }));
+
+  // Track if we've initialized from last listened chapter
+
+  // Initialize with last listened chapter after both stores have hydrated
+  useEffect(() => {
+    const historyHasHydrated = useHistoryStore.persist.hasHydrated();
+    const localeHasHydrated = useLocaleStore.persist.hasHydrated();
+
+    if (historyHasHydrated && localeHasHydrated) {
+      if (
+        lastListenedChapter &&
+        typeof lastListenedChapter.bookId === 'number' &&
+        lastListenedChapter.chapter
+      ) {
+        // Find the book in the current locale using the stored book ID
+        const bookInCurrentLocale = books.find(
+          (book) => book.id === lastListenedChapter.bookId,
+        );
+        if (bookInCurrentLocale) {
+          setSelection({
+            book: bookInCurrentLocale,
+            chapter: lastListenedChapter.chapter,
+          });
+        }
       }
     }
-    // Default to first book, first chapter
-    return {
-      book: books[0],
-      chapter: 1,
-    };
-  });
+  }, [lastListenedChapter, books]);
 
   // Update book when locale changes while maintaining the same book ID
   useEffect(() => {
@@ -74,12 +87,26 @@ export function BibleProvider({ children }: { children: ReactNode }) {
     }
   }, [locale, books]);
 
-  // Add to history when selection changes
+  // Add to history and update last listened when selection changes (only after both stores hydrated)
   useEffect(() => {
-    if (selection.book && selection.chapter) {
+    const historyHasHydrated = useHistoryStore.persist.hasHydrated();
+    const localeHasHydrated = useLocaleStore.persist.hasHydrated();
+
+    if (
+      historyHasHydrated &&
+      localeHasHydrated &&
+      selection.book &&
+      selection.chapter
+    ) {
       addToHistory(selection);
+      setLastListenedChapter(selection);
     }
-  }, [selection.book?.id, selection.chapter]);
+  }, [
+    selection.book?.id,
+    selection.chapter,
+    addToHistory,
+    setLastListenedChapter,
+  ]);
 
   const handleBookSelect = (value: string) => {
     const selectedBook = books.find(
@@ -200,11 +227,14 @@ export function BibleProvider({ children }: { children: ReactNode }) {
     error,
   };
 
-  // Format history for the context
-  const formattedHistory = history.map((entry) => ({
-    book: entry.book,
-    chapter: entry.chapter,
-  }));
+  // Format history for the context - convert book IDs back to book objects
+  const formattedHistory = history.map((entry) => {
+    const book = books.find((b) => b.id === entry.bookId);
+    return {
+      book: book || null,
+      chapter: entry.chapter,
+    };
+  });
 
   return (
     <BibleContext.Provider
