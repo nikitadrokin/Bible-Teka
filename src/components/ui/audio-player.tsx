@@ -15,7 +15,6 @@ import { Gauge, Pause, Play, Volume2, VolumeX } from 'lucide-react';
 import { useAudioStore } from '@/store/audio-store';
 import { useMediaSession } from '@/hooks/useMediaSession';
 import type { BibleBook } from '@/types/bible';
-import { Card } from './card';
 
 interface AudioPlayerProps extends React.HTMLAttributes<HTMLDivElement> {
   src: string;
@@ -558,7 +557,7 @@ export function AudioPlayer({
   };
 
   return (
-    <Card
+    <div
       className={cn(
         'flex flex-col gap-4 rounded-lg border-2 bg-card p-4',
         className,
@@ -694,6 +693,6 @@ export function AudioPlayer({
           </span>
         </div>
       </div>
-    </Card>
+    </div>
   );
 }
