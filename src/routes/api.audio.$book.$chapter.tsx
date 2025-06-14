@@ -1,8 +1,10 @@
-import { createAPIFileRoute } from '@tanstack/react-start/api';
+import { createServerFileRoute } from '@tanstack/react-start/server';
 
 const AUDIO_BASE_URL = 'https://4bbl.ru/data/syn-kozlov';
 
-export const APIRoute = createAPIFileRoute('/api/audio/$book/$chapter')({
+export const ServerRoute = createServerFileRoute(
+  '/api/audio/$book/$chapter',
+).methods({
   GET: async ({ request, params }) => {
     const { book, chapter: chapterParam } = params;
     const chapter = chapterParam.replace(/\.mp3$/, '');
