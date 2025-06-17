@@ -14,4 +14,7 @@ export default defineConfig({
       /** Add your options here */
     }),
   ],
+  build: {
+    outDir: '.output',
+  },
 });
