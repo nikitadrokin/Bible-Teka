@@ -10,6 +10,10 @@ import { Separator } from '@/components/ui/separator';
 import { useTranslation } from 'react-i18next';
 import { LocaleSwitcher } from '@/components/ui/locale-switcher';
 import { useSyncLanguage } from '@/lib/i18n';
+import { Button } from '@/components/ui/button';
+import { ExternalLinkIcon } from 'lucide-react';
+import { getYouVersionChapterUrl } from '@/lib/youversion';
+import { useLocaleStore } from '@/store/locale-store';
 
 export const Route = createFileRoute('/')({
   component: () => <BibleNavigator />,
@@ -27,6 +31,8 @@ function BibleNavigator() {
     handleChapterSelect,
     chapters,
   } = useBible();
+  const locale = useLocaleStore((state) => state.locale);
+  const youVersionUrl = getYouVersionChapterUrl(selection, locale);
 
   return (
     <div className='app-container bg-background' data-vaul-drawer-wrapper>
@@ -40,9 +46,29 @@ function BibleNavigator() {
         </div>
 
         <div className='grid gap-y-2'>
-          <div className='flex items-center justify-between gap-2'>
+          <div className='flex flex-wrap items-center justify-between gap-2'>
             <BibleInfo book={selection.book} />
-            <HistoryDialog />
+            <div className='flex items-center gap-2'>
+              {youVersionUrl ? (
+                <Button
+                  asChild
+                  variant='outline'
+                  size='sm'
+                  aria-label={t('openInBible')}
+                >
+                  <a href={youVersionUrl} target='_blank' rel='noopener noreferrer'>
+                    <ExternalLinkIcon className='h-4 w-4' />
+                    {t('openInBible')}
+                  </a>
+                </Button>
+              ) : (
+                <Button variant='outline' size='sm' disabled aria-label={t('openInBible')}>
+                  <ExternalLinkIcon className='h-4 w-4' />
+                  {t('openInBible')}
+                </Button>
+              )}
+              <HistoryDialog />
+            </div>
           </div>
 
           <AudioSection
