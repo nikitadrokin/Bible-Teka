@@ -10,6 +10,8 @@ import { Separator } from '@/components/ui/separator';
 import { useTranslation } from 'react-i18next';
 import { LocaleSwitcher } from '@/components/ui/locale-switcher';
 import { useSyncLanguage } from '@/lib/i18n';
+import { Button } from '@/components/ui/button';
+import { ExternalLinkIcon } from 'lucide-react';
 
 export const Route = createFileRoute('/')({
   component: () => <BibleNavigator />,
@@ -40,9 +42,26 @@ function BibleNavigator() {
         </div>
 
         <div className='grid gap-y-2'>
-          <div className='flex items-center justify-between gap-2'>
+          <div className='flex flex-wrap items-center justify-between gap-2'>
             <BibleInfo book={selection.book} />
-            <HistoryDialog />
+            <div className='flex items-center gap-2'>
+              <Button
+                asChild
+                variant='outline'
+                size='sm'
+                aria-label={t('openInBible')}
+              >
+                <a
+                  href='https://www.perplexity.ai/search/bdce9948-7853-4133-83bd-14628c702827'
+                  target='_blank'
+                  rel='noopener noreferrer'
+                >
+                  <ExternalLinkIcon className='h-4 w-4' />
+                  {t('openInBible')}
+                </a>
+              </Button>
+              <HistoryDialog />
+            </div>
           </div>
 
           <AudioSection
