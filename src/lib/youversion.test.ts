@@ -2,7 +2,10 @@ import { describe, expect, it } from 'vitest';
 import type { BibleBookSelection } from '@/types/bible';
 import { getYouVersionChapterUrl } from './youversion';
 
-const mockSelection = (bookId: number, chapter: number): BibleBookSelection => ({
+const mockSelection = (
+  bookId: number,
+  chapter: number,
+): BibleBookSelection => ({
   book: { id: bookId, name: 'Mock', chapters: 99 },
   chapter,
 });
@@ -10,19 +13,21 @@ const mockSelection = (bookId: number, chapter: number): BibleBookSelection => (
 describe('getYouVersionChapterUrl', () => {
   it('returns a formatted YouVersion URL for known books', () => {
     expect(getYouVersionChapterUrl(mockSelection(39, 3), 'en')).toBe(
-      'https://www.bible.com/bible/111/MAT.3.NIV',
+      'https://www.bible.com/bible/59/MAT.3.NIV',
     );
   });
 
   it('falls back to English when locale configuration is missing', () => {
     // @ts-expect-error Testing fallback for an unsupported locale
     expect(getYouVersionChapterUrl(mockSelection(0, 1), 'es')).toBe(
-      'https://www.bible.com/bible/111/GEN.1.NIV',
+      'https://www.bible.com/bible/59/GEN.1.NIV',
     );
   });
 
   it('returns null when selection is incomplete', () => {
-    expect(getYouVersionChapterUrl({ book: null, chapter: null }, 'en')).toBeNull();
+    expect(
+      getYouVersionChapterUrl({ book: null, chapter: null }, 'en'),
+    ).toBeNull();
   });
 
   it('returns null when an unknown book id is provided', () => {

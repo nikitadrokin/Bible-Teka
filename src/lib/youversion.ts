@@ -70,9 +70,12 @@ const YOUVERSION_BOOK_CODES = [
   'REV',
 ] as const;
 
-const YOUVERSION_LOCALE_CONFIG: Record<Locale, { versionId: string; translation: string }> = {
-  en: { versionId: '111', translation: 'NIV' },
-  ru: { versionId: '105', translation: 'RUSV' },
+const YOUVERSION_LOCALE_CONFIG: Record<
+  Locale,
+  { versionId: string; translation: string }
+> = {
+  en: { versionId: '59', translation: 'NIV' },
+  ru: { versionId: '400', translation: 'RUSV' },
 };
 
 export function getYouVersionChapterUrl(
@@ -88,8 +91,8 @@ export function getYouVersionChapterUrl(
     return null;
   }
 
-  const { versionId, translation } = YOUVERSION_LOCALE_CONFIG[locale] ??
-    YOUVERSION_LOCALE_CONFIG.en;
+  const { versionId, translation } =
+    YOUVERSION_LOCALE_CONFIG[locale] ?? YOUVERSION_LOCALE_CONFIG.ru;
 
   return `https://www.bible.com/bible/${versionId}/${bookCode}.${selection.chapter}.${translation}`;
 }
