@@ -31,6 +31,16 @@ export const createRouter = () => {
   return router;
 };
 
+let router: ReturnType<typeof createRouter> | null = null;
+
+export const getRouter = async () => {
+  if (!router) {
+    router = createRouter();
+  }
+
+  return router;
+};
+
 // Register the router instance for type safety
 declare module '@tanstack/react-router' {
   interface Register {

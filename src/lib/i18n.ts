@@ -14,6 +14,9 @@ const enResources = {
     oldTestament: 'Old Testament',
     newTestament: 'New Testament',
 
+    // External links
+    openInBible: 'Open in Bible',
+
     // Audio player
     failedToLoadAudio: 'Failed to load audio file:',
     unknownError: 'Unknown error',
@@ -41,6 +44,9 @@ const ruResources = {
     selectChapter: 'Выберите главу',
     oldTestament: 'Ветхий Завет',
     newTestament: 'Новый Завет',
+
+    // External links
+    openInBible: 'Открыть в Библии',
 
     // Audio player
     failedToLoadAudio: 'Не удалось загрузить аудиофайл:',
