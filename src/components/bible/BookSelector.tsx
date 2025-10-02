@@ -25,7 +25,7 @@ export function BookSelector({
 
   return (
     <div className='grid gap-4'>
-      <h3 className='text-sm font-semibold'>{t('selectBook')}</h3>
+      <h3 className='text-sm font-semibold select-none'>{t('selectBook')}</h3>
 
       <div className='grid gap-8'>
         <div className='grid gap-3'>
@@ -40,21 +40,33 @@ export function BookSelector({
                 : 'grid-cols-[repeat(auto-fill,minmax(145px,1fr))]',
             )}
           >
-            {oldTestamentBooks.map((book) => (
-              <Button
-                key={book.id}
-                onClick={() => onBookSelect(book.id.toString())}
-                variant={
-                  selectedBookId === book.id.toString() ? 'secondary' : 'ghost'
-                }
-                size='sm'
-                type='button'
-                aria-selected={selectedBookId === book.id.toString()}
-                className='justify-start transition-none'
-              >
-                {book.name}
-              </Button>
-            ))}
+            {oldTestamentBooks.map((book) => {
+              const isSelected = selectedBookId === book.id.toString();
+
+              return (
+                <Button
+                  key={book.id}
+                  onClick={() => onBookSelect(book.id.toString())}
+                  variant='ghost'
+                  size='sm'
+                  type='button'
+                  aria-selected={isSelected}
+                  className='w-full justify-start transition-none hover:bg-transparent px-0 relative'
+                >
+                  <span
+                    className={cn(
+                      'rounded-md px-2 py-1',
+                      isSelected
+                        ? 'bg-secondary text-secondary-foreground'
+                        : 'hover:bg-accent hover:text-accent-foreground',
+                    )}
+                  >
+                    {book.name}
+                    <span className='absolute inset-0' />
+                  </span>
+                </Button>
+              );
+            })}
           </div>
         </div>
 
@@ -70,21 +82,33 @@ export function BookSelector({
                 : 'grid-cols-[repeat(auto-fill,minmax(145px,1fr))]',
             )}
           >
-            {newTestamentBooks.map((book) => (
-              <Button
-                key={book.id}
-                onClick={() => onBookSelect(book.id.toString())}
-                variant={
-                  selectedBookId === book.id.toString() ? 'secondary' : 'ghost'
-                }
-                size='sm'
-                type='button'
-                aria-selected={selectedBookId === book.id.toString()}
-                className='justify-start transition-none'
-              >
-                {book.name}
-              </Button>
-            ))}
+            {newTestamentBooks.map((book) => {
+              const isSelected = selectedBookId === book.id.toString();
+
+              return (
+                <Button
+                  key={book.id}
+                  onClick={() => onBookSelect(book.id.toString())}
+                  variant='ghost'
+                  size='sm'
+                  type='button'
+                  aria-selected={isSelected}
+                  className='w-full justify-start transition-none hover:bg-transparent px-0 relative'
+                >
+                  <span
+                    className={cn(
+                      'rounded-md px-2 py-1',
+                      isSelected
+                        ? 'bg-secondary text-secondary-foreground'
+                        : 'hover:bg-accent hover:text-accent-foreground',
+                    )}
+                  >
+                    {book.name}
+                    <span className='absolute inset-0' />
+                  </span>
+                </Button>
+              );
+            })}
           </div>
         </div>
       </div>

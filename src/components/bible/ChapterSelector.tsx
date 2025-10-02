@@ -18,7 +18,7 @@ export function ChapterSelector({
 
   return (
     <div className='grid gap-4'>
-      <label className='text-sm font-medium leading-none'>
+      <label className='text-sm font-medium leading-none select-none'>
         {t('selectChapter')}
       </label>
       <div className='grid gap-2 grid-cols-[repeat(auto-fill,minmax(60px,1fr))]'>
