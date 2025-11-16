@@ -228,7 +228,10 @@ export function AudioPlayer({
         networkState: getNetworkStateText(audio.networkState),
         readyState: getReadyStateText(audio.readyState),
         bufferedRanges: getBufferedRanges(audio),
-        duration: audio.duration || 0,
+        duration:
+          Number.isFinite(audio.duration) && audio.duration > 0
+            ? audio.duration
+            : 0,
       });
     };
 
@@ -284,11 +287,15 @@ export function AudioPlayer({
     };
 
     const handleLoadedMetadata = () => {
-      setDuration(audio.duration);
+      const duration =
+        Number.isFinite(audio.duration) && audio.duration > 0
+          ? audio.duration
+          : 0;
+      setDuration(duration);
       updateDebug({
         loadingState: 'metadata-loaded',
         lastEvent: 'loadedmetadata',
-        duration: audio.duration,
+        duration: duration,
       });
       updateAudioState('loadedmetadata');
 
@@ -551,6 +558,9 @@ export function AudioPlayer({
   };
 
   const formatTime = (time: number) => {
+    if (!Number.isFinite(time) || time < 0) {
+      return '0:00';
+    }
     const minutes = Math.floor(time / 60);
     const seconds = Math.floor(time % 60);
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
@@ -681,7 +691,7 @@ export function AudioPlayer({
           </span>
           <Slider
             value={[currentTime]}
-            max={duration}
+            max={Number.isFinite(duration) && duration > 0 ? duration : 100}
             step={0.1}
             onValueChange={handleTimeChange}
             onValueCommit={handleScrubEnd}
