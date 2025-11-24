@@ -8,6 +8,7 @@ interface AudioSectionProps {
   isLoading: boolean;
   isError: boolean;
   error: unknown;
+  minimal?: boolean;
 }
 
 export function AudioSection({
@@ -15,6 +16,7 @@ export function AudioSection({
   isLoading,
   isError,
   error,
+  minimal = false,
 }: AudioSectionProps) {
   const { selection, advanceToNextChapter } = useBible();
   const { t } = useTranslation();
@@ -53,8 +55,9 @@ export function AudioSection({
           src={audioUrl}
           book={selection.book}
           chapter={selection.chapter}
-          className='mt-4'
+          className={minimal ? '' : 'mt-4'}
           onEnded={advanceToNextChapter}
+          minimal={minimal}
         />
       )}
     </>

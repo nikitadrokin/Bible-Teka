@@ -23,6 +23,7 @@ interface AudioPlayerProps extends React.HTMLAttributes<HTMLDivElement> {
   onEnded?: () => void;
   onNextTrack?: () => void;
   onPreviousTrack?: () => void;
+  minimal?: boolean;
 }
 
 const PLAYBACK_SPEEDS = [
@@ -42,6 +43,7 @@ export function AudioPlayer({
   onEnded,
   onNextTrack,
   onPreviousTrack,
+  minimal = false,
   ...props
 }: AudioPlayerProps) {
   const audioRef = useRef<HTMLAudioElement>(null);
@@ -565,6 +567,54 @@ export function AudioPlayer({
     const seconds = Math.floor(time % 60);
     return `${minutes}:${seconds.toString().padStart(2, '0')}`;
   };
+
+  if (minimal) {
+    return (
+       <div
+        className={cn(
+          'flex flex-col gap-2 select-none w-full',
+          className,
+        )}
+        {...props}
+      >
+         <audio ref={audioRef} src={src} />
+         {error && (
+            <div className='text-sm text-destructive text-center'>{error}</div>
+          )}
+
+          <div className="flex items-center gap-3">
+             <Button
+              variant='ghost'
+              size='icon'
+              onClick={togglePlayPause}
+              className='h-10 w-10 rounded-full bg-primary/10 hover:bg-primary/20'
+            >
+              {isPlaying ? (
+                <Pause className='h-5 w-5 fill-current' />
+              ) : (
+                <Play className='h-5 w-5 fill-current' />
+              )}
+            </Button>
+
+             <div className='flex flex-1 flex-col gap-1'>
+                <div className="flex justify-between text-xs text-muted-foreground">
+                    <span>{formatTime(currentTime)}</span>
+                    <span>{formatTime(duration)}</span>
+                </div>
+                <Slider
+                  value={[currentTime]}
+                  max={Number.isFinite(duration) && duration > 0 ? duration : 100}
+                  step={0.1}
+                  onValueChange={handleTimeChange}
+                  onValueCommit={handleScrubEnd}
+                  onPointerDown={handleScrubStart}
+                  className='w-full'
+                />
+             </div>
+          </div>
+      </div>
+    );
+  }
 
   return (
     <div
