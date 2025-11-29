@@ -518,9 +518,15 @@ export function AudioPlayer({
     // Update the current time state immediately for smoother UI
     setCurrentTime(newTime);
 
-    // Only update the actual audio time if the value has changed significantly
-    if (Math.abs(audioRef.current.currentTime - newTime) > 0.5) {
+    // Update the actual audio time during scrubbing regardless of difference
+    // This prevents the reset-to-zero issue by ensuring audio time always matches slider
+    if (isScrubbing) {
       audioRef.current.currentTime = newTime;
+    } else {
+      // For non-scrubbing updates, only change if significant difference
+      if (Math.abs(audioRef.current.currentTime - newTime) > 0.5) {
+        audioRef.current.currentTime = newTime;
+      }
     }
   };
 
