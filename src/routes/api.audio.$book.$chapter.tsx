@@ -8,27 +8,32 @@ export const ServerRoute = createServerFileRoute(
   GET: async ({ request, params }) => {
     const { book, chapter: chapterParam } = params;
     const chapter = chapterParam.replace(/\.mp3$/, '');
+    const audioUrl = `${AUDIO_BASE_URL}/${book}/${chapter}.mp3`;
 
     try {
-      const res = await fetch(`${AUDIO_BASE_URL}/${book}/${chapter}.mp3`);
+      const headers: HeadersInit = {};
+      const rangeHeader = request.headers.get('Range');
+      if (rangeHeader) {
+        headers['Range'] = rangeHeader;
+      }
 
-      if (!res.ok) {
+      const res = await fetch(audioUrl, { headers });
+
+      if (!res.ok && res.status !== 206) {
         return new Response(JSON.stringify({ error: 'Audio not found' }), {
           status: 404,
           headers: { 'Content-Type': 'application/json' },
         });
       }
 
-      // Get the audio data as an array buffer
-      const audioData = await res.arrayBuffer();
-
-      // Return the audio data with appropriate headers
-      return new Response(audioData, {
-        status: 200,
+      return new Response(res.body, {
+        status: res.status,
         headers: {
           'Content-Type': 'audio/mpeg',
-          'Content-Length': audioData.byteLength.toString(),
-          'Cache-Control': 'public, max-age=86400', // Cache for 24 hours
+          'Content-Length': res.headers.get('Content-Length') ?? '',
+          'Content-Range': res.headers.get('Content-Range') ?? '',
+          'Accept-Ranges': 'bytes',
+          'Cache-Control': 'public, max-age=86400',
         },
       });
     } catch (error) {
@@ -39,7 +44,7 @@ export const ServerRoute = createServerFileRoute(
       });
     }
   },
-  HEAD: async ({ request, params }) => {
+  HEAD: async ({ params }) => {
     const { book, chapter: chapterParam } = params;
     const chapter = chapterParam.replace(/\.mp3$/, '');
 
@@ -49,27 +54,21 @@ export const ServerRoute = createServerFileRoute(
       });
 
       if (!res.ok) {
-        return new Response(null, {
-          status: 404,
-          headers: { 'Content-Type': 'application/json' },
-        });
+        return new Response(null, { status: 404 });
       }
 
-      // Return just the headers for HEAD requests
       return new Response(null, {
         status: 200,
         headers: {
           'Content-Type': 'audio/mpeg',
-          'Content-Length': res.headers.get('Content-Length') || '0',
-          'Cache-Control': 'public, max-age=86400', // Cache for 24 hours
+          'Content-Length': res.headers.get('Content-Length') ?? '0',
+          'Accept-Ranges': 'bytes',
+          'Cache-Control': 'public, max-age=86400',
         },
       });
     } catch (error) {
       console.error('Error checking audio:', error);
-      return new Response(null, {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' },
-      });
+      return new Response(null, { status: 500 });
     }
   },
 });
