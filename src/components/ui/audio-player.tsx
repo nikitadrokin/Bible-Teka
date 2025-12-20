@@ -14,6 +14,7 @@ import { cn } from '@/lib/utils';
 import { Gauge, Pause, Play, Volume2, VolumeX } from 'lucide-react';
 import { useAudioStore } from '@/store/audio-store';
 import { useMediaSession } from '@/hooks/useMediaSession';
+import { useAudioShortcuts } from '@/hooks/useAudioShortcuts';
 import type { BibleBook } from '@/types/bible';
 
 interface AudioPlayerProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -487,6 +488,9 @@ export function AudioPlayer({
       await handlePlay();
     }
   };
+
+  // Global keyboard shortcuts
+  useAudioShortcuts({ onPlayPause: togglePlayPause });
 
   // Handle when user starts scrubbing
   const handleScrubStart = () => {
