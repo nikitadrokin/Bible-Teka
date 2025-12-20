@@ -46,7 +46,7 @@ const ruResources = {
     newTestament: 'Новый Завет',
 
     // External links
-    openInBible: 'Открыть в Библии',
+    openInBible: 'Читать',
 
     // Audio player
     failedToLoadAudio: 'Не удалось загрузить аудиофайл:',

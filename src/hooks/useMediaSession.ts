@@ -124,17 +124,30 @@ export function useMediaSession({
 
   // Update position state (throttled to avoid too many updates)
   useEffect(() => {
-    if (!('mediaSession' in navigator) || !duration || duration === 0) return;
+    // Critical fix: Ensure duration and currentTime are finite numbers
+    if (
+      !('mediaSession' in navigator) || 
+      !Number.isFinite(duration) || 
+      duration <= 0 ||
+      !Number.isFinite(currentTime)
+    ) {
+        return;
+    }
 
     const now = Date.now();
     // Throttle updates to every second
     if (now - lastUpdateRef.current < 1000) return;
     lastUpdateRef.current = now;
 
-    navigator.mediaSession.setPositionState({
-      duration,
-      playbackRate: 1,
-      position: currentTime,
-    });
+    try {
+      navigator.mediaSession.setPositionState({
+        duration,
+        playbackRate: 1,
+        position: currentTime,
+      });
+    } catch (error) {
+       // Ignore errors if state update fails to prevent app crash
+       console.error('Failed to set media session state:', error);
+    }
   }, [currentTime, duration]);
 }

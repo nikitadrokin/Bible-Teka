@@ -8,65 +8,61 @@ export const ServerRoute = createServerFileRoute(
   GET: async ({ request, params }) => {
     const { book, chapter: chapterParam } = params;
     const chapter = chapterParam.replace(/\.mp3$/, '');
+    const audioUrl = `${AUDIO_BASE_URL}/${book}/${chapter}.mp3`;
 
     try {
-      const res = await fetch(`${AUDIO_BASE_URL}/${book}/${chapter}.mp3`);
-
-      if (!res.ok) {
-        return new Response(JSON.stringify({ error: 'Audio not found' }), {
-          status: 404,
-          headers: { 'Content-Type': 'application/json' },
-        });
+      // 1. Forward the Range header and force identity encoding
+      const headers = new Headers();
+      const rangeHeader = request.headers.get('Range');
+      if (rangeHeader) {
+        headers.set('Range', rangeHeader);
       }
+      // Critical: Tell upstream NOT to compress the response (e.g. gzip/br).
+      // If node-fetch decompresses transparently, the Content-Length/Content-Range headers 
+      // from upstream might not match the byte stream we pipe to the user.
+      headers.set('Accept-Encoding', 'identity');
 
-      // Get the audio data as an array buffer
-      const audioData = await res.arrayBuffer();
+      // 2. Fetch from source
+      const res = await fetch(audioUrl, { headers });
 
-      // Return the audio data with appropriate headers
-      return new Response(audioData, {
-        status: 200,
-        headers: {
-          'Content-Type': 'audio/mpeg',
-          'Content-Length': audioData.byteLength.toString(),
-          'Cache-Control': 'public, max-age=86400', // Cache for 24 hours
-        },
+      // 3. Prepare response headers
+      // Forward ALL headers from the upstream response to ensure a 1:1 proxy match
+      const responseHeaders = new Headers();
+      
+      // List of hop-by-hop headers to ignore (RFC 2616, section 13.5.1)
+      const hopByHopHeaders = new Set([
+        'connection',
+        'keep-alive',
+        'proxy-authenticate',
+        'proxy-authorization',
+        'te',
+        'trailer',
+        'transfer-encoding',
+        'upgrade',
+        'content-encoding'
+      ]);
+
+      res.headers.forEach((value, key) => {
+        if (!hopByHopHeaders.has(key.toLowerCase())) {
+          responseHeaders.set(key, value);
+        }
       });
+
+      // Vital: Prevent Cloudflare/Vercel/Next from messing with the body
+      responseHeaders.set('Cache-Control', 'no-transform, public, max-age=2592000');
+      // Critical: Ensure downstream caches (Cloudflare) respect the Range header.
+      responseHeaders.set('Vary', 'Range');
+
+      // 4. Return the stream directly with the exact status code from upstream
+      return new Response(res.body, {
+        status: res.status,
+        statusText: res.statusText,
+        headers: responseHeaders,
+      });
+
     } catch (error) {
       console.error('Error fetching audio:', error);
       return new Response(JSON.stringify({ error: 'Failed to fetch audio' }), {
-        status: 500,
-        headers: { 'Content-Type': 'application/json' },
-      });
-    }
-  },
-  HEAD: async ({ request, params }) => {
-    const { book, chapter: chapterParam } = params;
-    const chapter = chapterParam.replace(/\.mp3$/, '');
-
-    try {
-      const res = await fetch(`${AUDIO_BASE_URL}/${book}/${chapter}.mp3`, {
-        method: 'HEAD',
-      });
-
-      if (!res.ok) {
-        return new Response(null, {
-          status: 404,
-          headers: { 'Content-Type': 'application/json' },
-        });
-      }
-
-      // Return just the headers for HEAD requests
-      return new Response(null, {
-        status: 200,
-        headers: {
-          'Content-Type': 'audio/mpeg',
-          'Content-Length': res.headers.get('Content-Length') || '0',
-          'Cache-Control': 'public, max-age=86400', // Cache for 24 hours
-        },
-      });
-    } catch (error) {
-      console.error('Error checking audio:', error);
-      return new Response(null, {
         status: 500,
         headers: { 'Content-Type': 'application/json' },
       });

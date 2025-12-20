@@ -1,12 +1,24 @@
-import { createRouter as createTanstackRouter } from '@tanstack/react-router';
+import { createRouter as createTanstackRouter, useRouter } from '@tanstack/react-router';
 import { routerWithQueryClient } from '@tanstack/react-router-with-query';
 import * as TanstackQuery from './integrations/tanstack-query/root-provider';
+import { useEffect } from 'react';
 
 // Import the generated route tree
 import { routeTree } from './routeTree.gen';
 
 import './styles.css';
 import './lib/i18n'; // Import i18n configuration
+
+// NotFound component that redirects to root
+function NotFound() {
+  const router = useRouter();
+  
+  useEffect(() => {
+    router.navigate({ to: '/' });
+  }, [router]);
+  
+  return null;
+}
 
 // Create a new router instance
 export const createRouter = () => {
@@ -18,6 +30,7 @@ export const createRouter = () => {
       },
       scrollRestoration: true,
       defaultPreloadStaleTime: 0,
+      defaultNotFoundComponent: NotFound,
 
       Wrap: (props: { children: React.ReactNode }) => {
         return (
