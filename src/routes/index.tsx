@@ -35,7 +35,7 @@ function BibleNavigator() {
   const youVersionUrl = getYouVersionChapterUrl(selection, locale);
 
   return (
-    <div className='app-container bg-background min-h-screen' data-vaul-drawer-wrapper>
+    <div className='app-container bg-background min-h-screen select-none' data-vaul-drawer-wrapper>
       <div className='container mx-auto p-4 lg:p-8 max-w-5xl'>
         {/* Header - Always visible at top */}
         <div className='flex justify-between items-center mb-8 lg:mb-12'>
