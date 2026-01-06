@@ -1,6 +1,6 @@
 import { useBible } from './BibleContext';
 import { Button } from '@/components/ui/button';
-import { ScrollArea } from '@/components/ui/scroll-area';
+import ScrollArea from '@/components/ui/scroll-area';
 import { useLocaleStore } from '@/store/locale-store';
 import { formatDateTime } from '@/lib/utils';
 import { useHistoryStore } from '@/store/history-store';
@@ -120,7 +120,7 @@ export function HistoryDialog() {
     );
 
   return (
-    <Drawer shouldScaleBackground>
+    <Drawer>
       <DrawerTrigger asChild>
         <Button variant='ghost' aria-label={t('readingHistory')}>
           <ClockIcon className='h-5 w-5' />
