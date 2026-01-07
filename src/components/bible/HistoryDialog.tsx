@@ -128,26 +128,26 @@ export function HistoryDialog() {
         </Button>
       </DrawerTrigger>
       <DrawerContent className='h-full'>
-        <DrawerHeader className='flex flex-row items-center justify-between pb-2'>
-          <DrawerTitle className='text-lg font-bold mr-auto'>
-            {t('readingHistory')}
-          </DrawerTitle>
-          <Button
-            variant='destructive'
-            size='sm'
-            onClick={() => clearHistory()}
-            className='h-8 px-2 text-xs'
-          >
-            {t('clearHistory')}
-          </Button>
-          <DrawerClose asChild>
-            <Button variant='ghost' size='sm' aria-label={t('close')}>
-              <XIcon className='h-5 w-5' />
-            </Button>
-          </DrawerClose>
-        </DrawerHeader>
-
         <ScrollArea className='w-full pr-4 mt-4'>
+          <DrawerHeader className='flex flex-row items-center justify-between pb-2'>
+            <DrawerTitle className='text-lg font-bold mr-auto'>
+              {t('readingHistory')}
+            </DrawerTitle>
+            <Button
+              variant='destructive'
+              size='sm'
+              onClick={() => clearHistory()}
+              className='h-8 px-2 text-xs'
+            >
+              {t('clearHistory')}
+            </Button>
+            <DrawerClose asChild>
+              <Button variant='ghost' size='sm' aria-label={t('close')}>
+                <XIcon className='h-5 w-5' />
+              </Button>
+            </DrawerClose>
+          </DrawerHeader>
+
           {history.length === 0 ? (
             <p className='text-sm text-muted-foreground text-center py-8'>
               {t('noHistory')}

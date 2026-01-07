@@ -22,7 +22,7 @@ const ScrollArea: React.FC<ScrollAreaProps> = ({
     <div
       className={cn(
         'relative flex flex-col overflow-scroll',
-        'before:absolute before:rounded-t-3xl before:inset-x-0 before:top-0 before:z-10 before:h-[var(--gradient-height-top)] before:bg-gradient-to-b before:from-[var(--gradient-color)] before:to-transparent before:content-[""]',
+        'before:absolute before:rounded-t-3xl md:before:rounded-t-none before:inset-x-0 before:top-0 before:z-10 before:h-[var(--gradient-height-top)] before:bg-gradient-to-b before:from-[var(--gradient-color)] before:to-transparent before:content-[""]',
         'after:pointer-events-none after:absolute after:inset-x-0 after:bottom-0 after:z-10 after:h-[var(--gradient-height-bottom)] after:bg-gradient-to-t after:from-[var(--gradient-color)] after:to-transparent after:content-[""]',
         isMobile
           ? 'h-full min-h-0 [&>*:first-child]:pt-[var(--gradient-height-top)] [&>*:last-child]:pb-[var(--gradient-height-bottom)]'
