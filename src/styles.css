@@ -125,6 +125,7 @@ code {
 }
 
 .dark {
+  color-scheme: dark;
   --background: oklch(0.18 0.025 72);
   --foreground: oklch(0.93 0.018 95);
   --card: oklch(0.23 0.024 72);
@@ -154,6 +155,18 @@ code {
   --sidebar-accent-foreground: oklch(0.93 0.018 95);
   --sidebar-border: oklch(0.36 0.02 75);
   --sidebar-ring: oklch(0.7 0.05 95);
+}
+
+.dark body {
+  background-image:
+    radial-gradient(circle at 20% -10%, oklch(0.35 0.05 95 / 0.25), transparent 38%),
+    radial-gradient(circle at 85% -20%, oklch(0.38 0.05 80 / 0.18), transparent 34%);
+  background-attachment: fixed;
+}
+
+.dark .texture {
+  opacity: 0.08;
+  mix-blend-mode: screen;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -190,14 +203,14 @@ code {
     --sidebar-ring: oklch(0.7 0.05 95);
   }
 
-  body {
+  :root:not(.light) body {
     background-image:
       radial-gradient(circle at 20% -10%, oklch(0.35 0.05 95 / 0.25), transparent 38%),
       radial-gradient(circle at 85% -20%, oklch(0.38 0.05 80 / 0.18), transparent 34%);
     background-attachment: fixed;
   }
 
-  .texture {
+  :root:not(.light) .texture {
     opacity: 0.08;
     mix-blend-mode: screen;
   }
