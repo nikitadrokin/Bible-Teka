@@ -19,9 +19,11 @@ import type { BibleBook } from '@/types/bible';
 
 interface AudioPlayerProps extends React.HTMLAttributes<HTMLDivElement> {
   src: string;
+  nextSrc?: string | null;
   book?: BibleBook | null;
   chapter?: number | null;
   onEnded?: () => void;
+  onPreloadNextTrack?: () => Promise<void> | void;
   onNextTrack?: () => void;
   onPreviousTrack?: () => void;
 }
@@ -35,18 +37,25 @@ const PLAYBACK_SPEEDS = [
   { value: '2', label: '2x' },
 ] as const;
 
+const NEXT_TRACK_PRELOAD_THRESHOLD_SECONDS = 30;
+
 export function AudioPlayer({
   src,
+  nextSrc,
   book,
   chapter,
   className,
   onEnded,
+  onPreloadNextTrack,
   onNextTrack,
   onPreviousTrack,
   ...props
 }: AudioPlayerProps) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const autoPlayTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const preloadedNextSrcRef = useRef<string | null>(null);
+  const preloadAudioRef = useRef<HTMLAudioElement | null>(null);
+  const preloadLinkRef = useRef<HTMLLinkElement | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
@@ -198,6 +207,44 @@ export function AudioPlayer({
     if (!audioRef.current) return;
     audioRef.current.currentTime = time;
     setCurrentTime(time);
+  };
+
+  const clearNextTrackPreload = () => {
+    if (preloadAudioRef.current) {
+      preloadAudioRef.current.src = '';
+      preloadAudioRef.current.load();
+      preloadAudioRef.current = null;
+    }
+
+    if (preloadLinkRef.current) {
+      preloadLinkRef.current.remove();
+      preloadLinkRef.current = null;
+    }
+
+    preloadedNextSrcRef.current = null;
+  };
+
+  const preloadNextTrack = () => {
+    if (!nextSrc || preloadedNextSrcRef.current === nextSrc) return;
+
+    preloadedNextSrcRef.current = nextSrc;
+
+    const preloadAudio = new Audio();
+    preloadAudio.preload = 'auto';
+    preloadAudio.src = nextSrc;
+    preloadAudio.load();
+    preloadAudioRef.current = preloadAudio;
+
+    if (typeof document !== 'undefined') {
+      const preloadLink = document.createElement('link');
+      preloadLink.rel = 'preload';
+      preloadLink.as = 'audio';
+      preloadLink.href = nextSrc;
+      document.head.appendChild(preloadLink);
+      preloadLinkRef.current = preloadLink;
+    }
+
+    void onPreloadNextTrack?.();
   };
 
   // Media Session integration
@@ -460,6 +507,7 @@ export function AudioPlayer({
   // Reset current time and debug info when src changes
   useEffect(() => {
     setCurrentTime(0);
+    clearNextTrackPreload();
     updateDebug({
       loadingState: 'loading-new-src',
       autoplayAttempted: false,
@@ -472,12 +520,23 @@ export function AudioPlayer({
     });
   }, [src]);
 
+  useEffect(() => {
+    if (!nextSrc || duration <= 0) return;
+
+    const remainingTime = duration - currentTime;
+    if (remainingTime > NEXT_TRACK_PRELOAD_THRESHOLD_SECONDS) return;
+
+    preloadNextTrack();
+  }, [currentTime, duration, nextSrc]);
+
   // Clean up timeout on unmount
   useEffect(() => {
     return () => {
       if (autoPlayTimeoutRef.current) {
         clearTimeout(autoPlayTimeoutRef.current);
       }
+
+      clearNextTrackPreload();
     };
   }, []);
 

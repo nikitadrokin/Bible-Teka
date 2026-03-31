@@ -7,11 +7,15 @@ import {
 } from 'react';
 import type { ReactNode } from 'react';
 import { useQuery } from '@tanstack/react-query';
+import { useQueryClient } from '@tanstack/react-query';
 import type { BibleBookSelection, BibleBook } from '@/types/bible';
-import { padNumber } from '@/lib/utils';
 import { bibleBooksEnglish, bibleBooksRussian } from '@/data/bible';
 import { useLocaleStore } from '@/store/locale-store';
 import { useHistoryStore } from '@/store/history-store';
+import {
+  getAudioUrlForSelection,
+  getNextBibleSelection,
+} from '@/lib/audio';
 
 interface BibleContextProps {
   selection: BibleBookSelection;
@@ -27,14 +31,45 @@ interface BibleContextProps {
   chapters: number[];
   advanceToNextChapter: () => void;
   advanceToNextBook: () => void;
+  nextAudioUrl: string | null;
+  prefetchNextChapter: () => Promise<void>;
   history: BibleBookSelection[];
 }
 
 const BibleContext = createContext<BibleContextProps | undefined>(undefined);
 
+const AUDIO_URL_QUERY_STALE_TIME = 5 * 60 * 1000;
+
+async function resolveAudioUrl(
+  book: BibleBook | null,
+  chapter: number | null,
+): Promise<string | null> {
+  if (!book || !chapter) return null;
+
+  const url = getAudioUrlForSelection({ book, chapter });
+  if (!url) return null;
+
+  try {
+    const response = await fetch(url, {
+      method: 'GET',
+    });
+
+    if (!response.ok) {
+      console.error('Audio file not found:', url, response.status);
+      throw new Error(`Audio file not found (${response.status})`);
+    }
+
+    return url;
+  } catch (err) {
+    console.error('Error fetching audio:', err);
+    throw new Error('Failed to load audio file');
+  }
+}
+
 export function BibleProvider({ children }: { children: ReactNode }) {
   const { locale } = useLocaleStore();
   const books = locale === 'en' ? bibleBooksEnglish : bibleBooksRussian;
+  const queryClient = useQueryClient();
   const { history, lastListenedChapter, addToHistory, setLastListenedChapter } =
     useHistoryStore();
 
@@ -130,6 +165,11 @@ export function BibleProvider({ children }: { children: ReactNode }) {
     ? Array.from({ length: selection.book.chapters }, (_, i) => i + 1)
     : [];
 
+  const nextSelection = getNextBibleSelection(selection, books);
+  const nextAudioUrl = nextSelection
+    ? getAudioUrlForSelection(nextSelection)
+    : null;
+
   // Advance to the next chapter or next book's first chapter
   const advanceToNextChapter = useCallback(() => {
     if (!selection.book || !selection.chapter) return;
@@ -176,35 +216,21 @@ export function BibleProvider({ children }: { children: ReactNode }) {
     error,
   } = useQuery({
     queryKey: ['audioUrl', selection.book?.id, selection.chapter],
-    queryFn: async () => {
-      if (!selection.book || !selection.chapter) return null;
-
-      const bookNum = padNumber(selection.book.id + 1); // Add 1 because our IDs start at 0
-      const chapterNum = padNumber(selection.chapter);
-      // Use the API route for audio
-      const url = `/api/audio/${bookNum}/${chapterNum}.mp3`;
-
-      try {
-        // Check if the audio file exists through our API route
-        const response = await fetch(url, {
-          method: 'GET',
-        });
-
-        if (!response.ok) {
-          console.error('Audio file not found:', url, response.status);
-          throw new Error(`Audio file not found (${response.status})`);
-        }
-
-        // If the request succeeds, return the URL for the audio player
-        return url;
-      } catch (err) {
-        console.error('Error fetching audio:', err);
-        throw new Error('Failed to load audio file');
-      }
-    },
+    queryFn: () => resolveAudioUrl(selection.book, selection.chapter),
     enabled: !!selection.book && !!selection.chapter,
     retry: 1, // Only retry once
+    staleTime: AUDIO_URL_QUERY_STALE_TIME,
   });
+
+  const prefetchNextChapter = useCallback(async () => {
+    if (!nextSelection?.book || !nextSelection.chapter) return;
+
+    await queryClient.prefetchQuery({
+      queryKey: ['audioUrl', nextSelection.book.id, nextSelection.chapter],
+      queryFn: () => resolveAudioUrl(nextSelection.book, nextSelection.chapter),
+      staleTime: AUDIO_URL_QUERY_STALE_TIME,
+    });
+  }, [nextSelection?.book?.id, nextSelection?.chapter, queryClient]);
 
   // Handle audio fetch errors by advancing to the next book
   useEffect(() => {
@@ -247,6 +273,8 @@ export function BibleProvider({ children }: { children: ReactNode }) {
         chapters,
         advanceToNextChapter,
         advanceToNextBook,
+        nextAudioUrl,
+        prefetchNextChapter,
         history: formattedHistory,
       }}
     >

@@ -16,7 +16,8 @@ export function AudioSection({
   isError,
   error,
 }: AudioSectionProps) {
-  const { selection, advanceToNextChapter } = useBible();
+  const { selection, advanceToNextChapter, nextAudioUrl, prefetchNextChapter } =
+    useBible();
   const { t } = useTranslation();
 
   return (
@@ -51,10 +52,12 @@ export function AudioSection({
       {audioUrl && (
         <AudioPlayer
           src={audioUrl}
+          nextSrc={nextAudioUrl}
           book={selection.book}
           chapter={selection.chapter}
           className='mt-4'
           onEnded={advanceToNextChapter}
+          onPreloadNextTrack={prefetchNextChapter}
         />
       )}
     </>
