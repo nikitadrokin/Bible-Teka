@@ -1,13 +1,13 @@
 import {
   createContext,
   useContext,
-  useState,
   useCallback,
   useEffect,
 } from 'react';
 import type { ReactNode } from 'react';
 import { useQuery } from '@tanstack/react-query';
 import { useQueryClient } from '@tanstack/react-query';
+import { useQueryStates, parseAsString, parseAsInteger } from 'nuqs';
 import type { BibleBookSelection, BibleBook } from '@/types/bible';
 import { bibleBooksEnglish, bibleBooksRussian } from '@/data/bible';
 import { useLocaleStore } from '@/store/locale-store';
@@ -16,10 +16,11 @@ import {
   getAudioUrlForSelection,
   getNextBibleSelection,
 } from '@/lib/audio';
+import { bookIdToSlug, slugToBookId } from '@/lib/book-slugs';
 
 interface BibleContextProps {
   selection: BibleBookSelection;
-  setSelection: React.Dispatch<React.SetStateAction<BibleBookSelection>>;
+  setSelection: (value: BibleBookSelection) => void;
   audioQuery: {
     data: string | null;
     isLoading: boolean;
@@ -73,54 +74,37 @@ export function BibleProvider({ children }: { children: ReactNode }) {
   const { history, lastListenedChapter, addToHistory, setLastListenedChapter } =
     useHistoryStore();
 
-  // Initialize with default selection (will be updated after hydration)
-  const [selection, setSelection] = useState<BibleBookSelection>(() => ({
-    book: lastListenedChapter?.bookId
-      ? books[lastListenedChapter.bookId]
-      : null,
-    chapter: lastListenedChapter?.chapter || 1,
-  }));
+  // URL query params: ?book=genesis&chapter=1
+  const [{ book: bookSlug, chapter }, setParams] = useQueryStates({
+    book: parseAsString,
+    chapter: parseAsInteger,
+  });
 
-  // Track if we've initialized from last listened chapter
+  // Derive the book object from the slug in the URL
+  const bookId = bookSlug !== null ? slugToBookId(bookSlug) : null;
+  const book = bookId !== null ? (books.find((b) => b.id === bookId) ?? null) : null;
+  const selection: BibleBookSelection = { book, chapter };
 
-  // Initialize with last listened chapter after both stores have hydrated
+  // Initialize URL params from lastListenedChapter when no URL params are present
   useEffect(() => {
+    if (bookSlug !== null) return; // URL already has a book, don't overwrite
+
     const historyHasHydrated = useHistoryStore.persist.hasHydrated();
     const localeHasHydrated = useLocaleStore.persist.hasHydrated();
 
-    if (historyHasHydrated && localeHasHydrated) {
-      if (
-        lastListenedChapter &&
-        typeof lastListenedChapter.bookId === 'number' &&
-        lastListenedChapter.chapter
-      ) {
-        // Find the book in the current locale using the stored book ID
-        const bookInCurrentLocale = books.find(
-          (book) => book.id === lastListenedChapter.bookId,
-        );
-        if (bookInCurrentLocale) {
-          setSelection({
-            book: bookInCurrentLocale,
-            chapter: lastListenedChapter.chapter,
-          });
-        }
+    if (
+      historyHasHydrated &&
+      localeHasHydrated &&
+      lastListenedChapter &&
+      typeof lastListenedChapter.bookId === 'number' &&
+      lastListenedChapter.chapter
+    ) {
+      const slug = bookIdToSlug(lastListenedChapter.bookId);
+      if (slug) {
+        setParams({ book: slug, chapter: lastListenedChapter.chapter });
       }
     }
-  }, [lastListenedChapter, books]);
-
-  // Update book when locale changes while maintaining the same book ID
-  useEffect(() => {
-    if (selection.book) {
-      const currentBookId = selection.book.id;
-      const bookInNewLocale = books.find((book) => book.id === currentBookId);
-      if (bookInNewLocale) {
-        setSelection((prev) => ({
-          ...prev,
-          book: bookInNewLocale,
-        }));
-      }
-    }
-  }, [locale, books]);
+  }, [lastListenedChapter]);
 
   // Add to history and update last listened when selection changes (only after both stores hydrated)
   useEffect(() => {
@@ -143,26 +127,27 @@ export function BibleProvider({ children }: { children: ReactNode }) {
     setLastListenedChapter,
   ]);
 
+  // Convenience setter: accepts a BibleBookSelection and updates URL params
+  const setSelection = useCallback(
+    (value: BibleBookSelection) => {
+      const slug = value.book ? bookIdToSlug(value.book.id) : null;
+      setParams({ book: slug, chapter: value.chapter });
+    },
+    [setParams],
+  );
+
   const handleBookSelect = (value: string) => {
-    const selectedBook = books.find(
-      (book: BibleBook) => book.id === parseInt(value),
-    );
-    // Always set chapter to 1 when a book is selected
-    setSelection({
-      book: selectedBook ?? null,
-      chapter: selectedBook ? 1 : null,
-    });
+    const selectedBookId = parseInt(value);
+    const slug = bookIdToSlug(selectedBookId);
+    setParams({ book: slug, chapter: 1 });
   };
 
   const handleChapterSelect = (value: string) => {
-    setSelection((prev) => ({
-      ...prev,
-      chapter: parseInt(value),
-    }));
+    setParams({ chapter: parseInt(value) });
   };
 
-  const chapters = selection.book
-    ? Array.from({ length: selection.book.chapters }, (_, i) => i + 1)
+  const chapters = book
+    ? Array.from({ length: book.chapters }, (_, i) => i + 1)
     : [];
 
   const nextSelection = getNextBibleSelection(selection, books);
@@ -172,42 +157,31 @@ export function BibleProvider({ children }: { children: ReactNode }) {
 
   // Advance to the next chapter or next book's first chapter
   const advanceToNextChapter = useCallback(() => {
-    if (!selection.book || !selection.chapter) return;
+    if (!book || !chapter) return;
 
-    // If current chapter is not the last one in the book
-    if (selection.chapter < selection.book.chapters) {
-      // Go to next chapter
-      setSelection((prev) => ({
-        ...prev,
-        chapter: (prev.chapter || 0) + 1,
-      }));
+    if (chapter < book.chapters) {
+      setParams({ chapter: chapter + 1 });
     } else {
-      // Go to first chapter of next book
       advanceToNextBook();
     }
-  }, [selection.book, selection.chapter]);
+  }, [book, chapter, setParams]);
 
   // Advance to the next book, starting from chapter 1
   const advanceToNextBook = useCallback(() => {
-    if (!selection.book) return;
+    if (!book) return;
 
-    // If not the last book
-    if (selection.book.id < books.length - 1) {
-      const nextBook = books.find((book) => book.id === selection.book!.id + 1);
+    if (book.id < books.length - 1) {
+      const nextBook = books.find((b) => b.id === book.id + 1);
       if (nextBook) {
-        setSelection({
-          book: nextBook,
-          chapter: 1,
-        });
+        const slug = bookIdToSlug(nextBook.id);
+        setParams({ book: slug, chapter: 1 });
       }
     } else {
-      // If it's the last book, loop back to the first book
-      setSelection({
-        book: books[0],
-        chapter: 1,
-      });
+      // Last book: loop back to the first book
+      const slug = bookIdToSlug(books[0].id);
+      setParams({ book: slug, chapter: 1 });
     }
-  }, [selection.book]);
+  }, [book, books, setParams]);
 
   const {
     data: audioData,
@@ -215,10 +189,10 @@ export function BibleProvider({ children }: { children: ReactNode }) {
     isError,
     error,
   } = useQuery({
-    queryKey: ['audioUrl', selection.book?.id, selection.chapter],
-    queryFn: () => resolveAudioUrl(selection.book, selection.chapter),
-    enabled: !!selection.book && !!selection.chapter,
-    retry: 1, // Only retry once
+    queryKey: ['audioUrl', book?.id, chapter],
+    queryFn: () => resolveAudioUrl(book, chapter),
+    enabled: !!book && !!chapter,
+    retry: 1,
     staleTime: AUDIO_URL_QUERY_STALE_TIME,
   });
 
@@ -234,18 +208,16 @@ export function BibleProvider({ children }: { children: ReactNode }) {
 
   // Handle audio fetch errors by advancing to the next book
   useEffect(() => {
-    if (isError && selection.book && selection.chapter) {
+    if (isError && book && chapter) {
       console.log('Error fetching audio, advancing to next book');
-      // Use a small delay to prevent immediate re-render issues
       const timeoutId = setTimeout(() => {
         advanceToNextBook();
       }, 1000);
 
       return () => clearTimeout(timeoutId);
     }
-  }, [isError, selection.book, selection.chapter, advanceToNextBook]);
+  }, [isError, book, chapter, advanceToNextBook]);
 
-  // Ensure audioData is never undefined, only string | null
   const audioQuery = {
     data: audioData ?? null,
     isLoading,
@@ -255,9 +227,9 @@ export function BibleProvider({ children }: { children: ReactNode }) {
 
   // Format history for the context - convert book IDs back to book objects
   const formattedHistory = history.map((entry) => {
-    const book = books.find((b) => b.id === entry.bookId);
+    const historyBook = books.find((b) => b.id === entry.bookId);
     return {
-      book: book || null,
+      book: historyBook || null,
       chapter: entry.chapter,
     };
   });
