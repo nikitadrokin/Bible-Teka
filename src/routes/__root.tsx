@@ -5,6 +5,7 @@ import {
   createRootRouteWithContext,
 } from '@tanstack/react-router';
 import { useEffect } from 'react';
+import { NuqsAdapter } from 'nuqs/adapters/tanstack-router';
 
 import appCss from '../styles.css?url';
 
@@ -79,10 +80,12 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
   component: () => (
     <RootDocument>
       <div className='texture' />
-      <BibleProvider>
-        <DynamicTitle />
-        <Outlet />
-      </BibleProvider>
+      <NuqsAdapter>
+        <BibleProvider>
+          <DynamicTitle />
+          <Outlet />
+        </BibleProvider>
+      </NuqsAdapter>
     </RootDocument>
   ),
 });
