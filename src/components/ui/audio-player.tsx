@@ -34,6 +34,7 @@ const PLAYBACK_SPEEDS = [
   { value: '1.2', label: '1.2x' },
   { value: '1.25', label: '1.25x' },
   { value: '1.5', label: '1.5x' },
+  { value: '1.75', label: '1.75x' },
   { value: '2', label: '2x' },
 ] as const;
 
