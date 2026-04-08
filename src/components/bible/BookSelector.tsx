@@ -25,8 +25,6 @@ export function BookSelector({
 
   return (
     <div className='grid gap-4'>
-      <h3 className='text-sm font-semibold select-none'>{t('selectBook')}</h3>
-
       <div className='grid gap-8'>
         <div className='grid gap-3'>
           <Label className='text-sm font-medium leading-none'>
