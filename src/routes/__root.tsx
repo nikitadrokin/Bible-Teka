@@ -75,6 +75,13 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
         href: '/manifest.json',
       },
     ],
+    scripts: [
+      {
+        src: 'https://umami.nkdr.me/script.js',
+        defer: true,
+        'data-website-id': '04657830-aad7-45ac-bf50-fca6b728fa22',
+      },
+    ],
   }),
 
   component: () => (
