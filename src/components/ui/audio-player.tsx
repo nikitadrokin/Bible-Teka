@@ -15,6 +15,10 @@ import { Gauge, Pause, Play, Volume2, VolumeX } from 'lucide-react';
 import { useAudioStore } from '@/store/audio-store';
 import { useMediaSession } from '@/hooks/useMediaSession';
 import { useAudioShortcuts } from '@/hooks/useAudioShortcuts';
+import {
+  needsRestrictedAutoplayWorkaround,
+  usesDesktopAutoplay,
+} from '@/lib/device-detection';
 import type { BibleBook } from '@/types/bible';
 
 interface AudioPlayerProps extends React.HTMLAttributes<HTMLDivElement> {
@@ -54,6 +58,8 @@ export function AudioPlayer({
 }: AudioPlayerProps) {
   const audioRef = useRef<HTMLAudioElement>(null);
   const autoPlayTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+  const iosLoadingTriggeredRef = useRef(false);
+  const wasPlayingRef = useRef(false);
   const preloadedNextSrcRef = useRef<string | null>(null);
   const preloadAudioRef = useRef<HTMLAudioElement | null>(null);
   const preloadLinkRef = useRef<HTMLLinkElement | null>(null);
@@ -139,11 +145,58 @@ export function AudioPlayer({
     return ranges.join(', ');
   };
 
+  const attemptDesktopAutoplay = async (
+    audio: HTMLAudioElement,
+    eventName: string,
+  ) => {
+    if (!usesDesktopAutoplay()) return;
+
+    updateDebug({
+      autoplayAttempted: true,
+      lastEvent: `${eventName}-autoplay-attempt`,
+    });
+
+    try {
+      await audio.play();
+      setIsPlaying(true);
+      setError(null);
+      updateDebug({
+        autoplaySuccess: true,
+        loadingState: 'playing',
+        lastEvent: `${eventName}-autoplay-success`,
+      });
+    } catch (err) {
+      console.error('Desktop auto-play failed:', err);
+      updateDebug({
+        autoplayError:
+          err instanceof Error ? err.message : 'Unknown autoplay error',
+        autoplaySuccess: false,
+        lastEvent: `${eventName}-autoplay-failed`,
+      });
+    }
+  };
+
+  const scheduleDesktopAutoplay = (
+    audio: HTMLAudioElement,
+    eventName: string,
+    delayMs = 500,
+  ) => {
+    if (!usesDesktopAutoplay()) return;
+
+    if (autoPlayTimeoutRef.current) {
+      clearTimeout(autoPlayTimeoutRef.current);
+    }
+
+    autoPlayTimeoutRef.current = setTimeout(() => {
+      void attemptDesktopAutoplay(audio, eventName);
+    }, delayMs);
+  };
+
   // iOS-specific loading trigger
   const triggerIOSLoading = async (audio: HTMLAudioElement) => {
-    const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
-    if (!isIOS) return false;
+    if (!needsRestrictedAutoplayWorkaround()) return false;
 
+    iosLoadingTriggeredRef.current = true;
     updateDebug({
       iosLoadingTriggered: true,
       loadingState: 'triggering-ios-loading',
@@ -180,6 +233,7 @@ export function AudioPlayer({
     try {
       await audioRef.current.play();
       setIsPlaying(true);
+      wasPlayingRef.current = true;
       setError(null);
       updateDebug({ autoplaySuccess: true, lastEvent: 'manual-play-success' });
     } catch (err) {
@@ -198,6 +252,7 @@ export function AudioPlayer({
     try {
       await audioRef.current.pause();
       setIsPlaying(false);
+      wasPlayingRef.current = false;
       updateDebug({ lastEvent: 'pause' });
     } catch (err) {
       console.error('Pause error:', err);
@@ -341,9 +396,11 @@ export function AudioPlayer({
       });
       updateAudioState('loadedmetadata');
 
-      // On iOS, trigger loading after metadata is loaded
-      const isIOS = /iPhone|iPad|iPod/.test(navigator.userAgent);
-      if (isIOS && !debugInfo.iosLoadingTriggered) {
+      // On iOS/iPadOS, trigger loading after metadata is loaded
+      if (
+        needsRestrictedAutoplayWorkaround() &&
+        !iosLoadingTriggeredRef.current
+      ) {
         // Wait a bit for iOS to settle, then trigger loading
         setTimeout(async () => {
           const loadingTriggered = await triggerIOSLoading(audio);
@@ -356,6 +413,7 @@ export function AudioPlayer({
                   try {
                     await audio.play();
                     setIsPlaying(true);
+                    wasPlayingRef.current = true;
                     updateDebug({
                       autoplayAttempted: true,
                       autoplaySuccess: true,
@@ -420,7 +478,7 @@ export function AudioPlayer({
       updateAudioState('canplay');
     };
 
-    // Auto-play when audio finishes loading
+    // Auto-play when audio finishes loading (desktop/macOS only — iOS uses its own path)
     const handleCanPlayThrough = () => {
       updateDebug({
         canPlayThrough: true,
@@ -429,39 +487,7 @@ export function AudioPlayer({
       });
       updateAudioState('canplaythrough');
 
-      // Clear any existing timeout
-      if (autoPlayTimeoutRef.current) {
-        clearTimeout(autoPlayTimeoutRef.current);
-      }
-
-      // Auto-play after 500ms delay
-      autoPlayTimeoutRef.current = setTimeout(async () => {
-        updateDebug({
-          autoplayAttempted: true,
-          lastEvent: 'autoplay-attempt',
-        });
-
-        try {
-          await audio.play();
-          setIsPlaying(true);
-          setError(null);
-          updateDebug({
-            autoplaySuccess: true,
-            loadingState: 'playing',
-            lastEvent: 'autoplay-success',
-          });
-        } catch (err) {
-          console.error('Auto-play failed:', err);
-          updateDebug({
-            autoplayError:
-              err instanceof Error ? err.message : 'Unknown autoplay error',
-            autoplaySuccess: false,
-            lastEvent: 'autoplay-failed',
-          });
-          // Don't set error here as it might be due to browser autoplay policy
-          // User can still click play manually
-        }
-      }, 500);
+      scheduleDesktopAutoplay(audio, 'canplaythrough');
     };
 
     // Add all event listeners
@@ -481,8 +507,8 @@ export function AudioPlayer({
     // Set initial playback speed from store
     audio.playbackRate = playbackSpeed;
 
-    // Preload metadata
-    audio.preload = 'metadata';
+    // iOS limits loading unless triggered; desktop needs fuller preload for autoplay
+    audio.preload = needsRestrictedAutoplayWorkaround() ? 'metadata' : 'auto';
 
     return () => {
       // Clear timeout on cleanup
@@ -507,8 +533,19 @@ export function AudioPlayer({
 
   // Reset current time and debug info when src changes
   useEffect(() => {
+    const audio = audioRef.current;
+    const shouldContinuePlayback = wasPlayingRef.current;
+
     setCurrentTime(0);
     clearNextTrackPreload();
+
+    if (autoPlayTimeoutRef.current) {
+      clearTimeout(autoPlayTimeoutRef.current);
+      autoPlayTimeoutRef.current = null;
+    }
+
+    iosLoadingTriggeredRef.current = false;
+
     updateDebug({
       loadingState: 'loading-new-src',
       autoplayAttempted: false,
@@ -519,6 +556,35 @@ export function AudioPlayer({
       lastEvent: 'src-changed',
       iosLoadingTriggered: false,
     });
+
+    // Continue playback across chapter changes on desktop/macOS
+    if (audio && usesDesktopAutoplay() && shouldContinuePlayback) {
+      let onCanPlayThrough: (() => void) | undefined;
+
+      const tryContinuePlayback = () => {
+        if (audio.readyState >= 4) {
+          scheduleDesktopAutoplay(audio, 'chapter-change', 100);
+          return;
+        }
+
+        onCanPlayThrough = () => {
+          if (onCanPlayThrough) {
+            audio.removeEventListener('canplaythrough', onCanPlayThrough);
+          }
+          scheduleDesktopAutoplay(audio, 'chapter-change', 100);
+        };
+
+        audio.addEventListener('canplaythrough', onCanPlayThrough);
+      };
+
+      tryContinuePlayback();
+
+      return () => {
+        if (onCanPlayThrough) {
+          audio.removeEventListener('canplaythrough', onCanPlayThrough);
+        }
+      };
+    }
   }, [src]);
 
   useEffect(() => {
