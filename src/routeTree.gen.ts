@@ -8,14 +8,31 @@
 // You should NOT make any changes in this file as it will be overwritten.
 // Additionally, you should also exclude this file from your linter and/or formatter to prevent it from being checked or modified.
 
+import { createServerRootRoute } from '@tanstack/react-start/server'
+
 import { Route as rootRouteImport } from './routes/__root'
 import { Route as IndexRouteImport } from './routes/index'
+import { ServerRoute as ApiTrpcSplatServerRouteImport } from './routes/api.trpc.$'
+import { ServerRoute as ApiAudioBookChapterServerRouteImport } from './routes/api.audio.$book.$chapter'
+
+const rootServerRouteImport = createServerRootRoute()
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
   path: '/',
   getParentRoute: () => rootRouteImport,
 } as any)
+const ApiTrpcSplatServerRoute = ApiTrpcSplatServerRouteImport.update({
+  id: '/api/trpc/$',
+  path: '/api/trpc/$',
+  getParentRoute: () => rootServerRouteImport,
+} as any)
+const ApiAudioBookChapterServerRoute =
+  ApiAudioBookChapterServerRouteImport.update({
+    id: '/api/audio/$book/$chapter',
+    path: '/api/audio/$book/$chapter',
+    getParentRoute: () => rootServerRouteImport,
+  } as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -38,6 +55,31 @@ export interface FileRouteTypes {
 export interface RootRouteChildren {
   IndexRoute: typeof IndexRoute
 }
+export interface FileServerRoutesByFullPath {
+  '/api/trpc/$': typeof ApiTrpcSplatServerRoute
+  '/api/audio/$book/$chapter': typeof ApiAudioBookChapterServerRoute
+}
+export interface FileServerRoutesByTo {
+  '/api/trpc/$': typeof ApiTrpcSplatServerRoute
+  '/api/audio/$book/$chapter': typeof ApiAudioBookChapterServerRoute
+}
+export interface FileServerRoutesById {
+  __root__: typeof rootServerRouteImport
+  '/api/trpc/$': typeof ApiTrpcSplatServerRoute
+  '/api/audio/$book/$chapter': typeof ApiAudioBookChapterServerRoute
+}
+export interface FileServerRouteTypes {
+  fileServerRoutesByFullPath: FileServerRoutesByFullPath
+  fullPaths: '/api/trpc/$' | '/api/audio/$book/$chapter'
+  fileServerRoutesByTo: FileServerRoutesByTo
+  to: '/api/trpc/$' | '/api/audio/$book/$chapter'
+  id: '__root__' | '/api/trpc/$' | '/api/audio/$book/$chapter'
+  fileServerRoutesById: FileServerRoutesById
+}
+export interface RootServerRouteChildren {
+  ApiTrpcSplatServerRoute: typeof ApiTrpcSplatServerRoute
+  ApiAudioBookChapterServerRoute: typeof ApiAudioBookChapterServerRoute
+}
 
 declare module '@tanstack/react-router' {
   interface FileRoutesByPath {
@@ -50,6 +92,24 @@ declare module '@tanstack/react-router' {
     }
   }
 }
+declare module '@tanstack/react-start/server' {
+  interface ServerFileRoutesByPath {
+    '/api/trpc/$': {
+      id: '/api/trpc/$'
+      path: '/api/trpc/$'
+      fullPath: '/api/trpc/$'
+      preLoaderRoute: typeof ApiTrpcSplatServerRouteImport
+      parentRoute: typeof rootServerRouteImport
+    }
+    '/api/audio/$book/$chapter': {
+      id: '/api/audio/$book/$chapter'
+      path: '/api/audio/$book/$chapter'
+      fullPath: '/api/audio/$book/$chapter'
+      preLoaderRoute: typeof ApiAudioBookChapterServerRouteImport
+      parentRoute: typeof rootServerRouteImport
+    }
+  }
+}
 
 const rootRouteChildren: RootRouteChildren = {
   IndexRoute: IndexRoute,
@@ -57,12 +117,10 @@ const rootRouteChildren: RootRouteChildren = {
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)
   ._addFileTypes<FileRouteTypes>()
-
-import type { getRouter } from './router.tsx'
-import type { createStart } from '@tanstack/react-start'
-declare module '@tanstack/react-start' {
-  interface Register {
-    ssr: true
-    router: Awaited<ReturnType<typeof getRouter>>
-  }
+const rootServerRouteChildren: RootServerRouteChildren = {
+  ApiTrpcSplatServerRoute: ApiTrpcSplatServerRoute,
+  ApiAudioBookChapterServerRoute: ApiAudioBookChapterServerRoute,
 }
+export const serverRouteTree = rootServerRouteImport
+  ._addFileChildren(rootServerRouteChildren)
+  ._addFileTypes<FileServerRouteTypes>()
