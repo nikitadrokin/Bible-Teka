@@ -33,6 +33,7 @@ export function ChapterSelector({
             type='button'
             disabled={disabled}
             aria-selected={selectedChapter === chapter.toString()}
+            className='transition-none'
           >
             {chapter}
           </Button>

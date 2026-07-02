@@ -48,7 +48,7 @@ export function BookSelector({
                 >
                   <span
                     className={cn(
-                      'rounded-md px-2 py-1',
+                      'rounded-md px-2 py-1 transition-none',
                       isSelected
                         ? 'bg-secondary text-secondary-foreground'
                         : 'hover:bg-accent hover:text-accent-foreground',
@@ -88,7 +88,7 @@ export function BookSelector({
                 >
                   <span
                     className={cn(
-                      'rounded-md px-2 py-1',
+                      'rounded-md px-2 py-1 transition-none',
                       isSelected
                         ? 'bg-secondary text-secondary-foreground'
                         : 'hover:bg-accent hover:text-accent-foreground',
