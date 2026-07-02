@@ -746,7 +746,7 @@ export function AudioPlayer({
       )}
 
       {/* First row - General info and volume control */}
-      <div className='flex items-center justify-between gap-x-2 gap-y-4 flex-wrap'>
+      <div className='flex items-center justify-between gap-x-2 gap-y-4 max-lg:hidden flex-wrap'>
         <div className='flex items-center space-x-2'>
           <Select
             value={playbackSpeed.toString()}
@@ -791,22 +791,22 @@ export function AudioPlayer({
       </div>
 
       {/* Second row - Media player controls */}
-      <div className='flex items-center justify-between'>
+      <div className='flex items-center justify-between gap-3'>
         <Button
           variant='ghost'
           size='icon'
           onClick={togglePlayPause}
-          className='h-8 w-8'
+          className='h-8 w-8 max-lg:size-12 max-lg:rounded-full max-lg:bg-primary max-lg:text-primary-foreground max-lg:hover:bg-primary/90 max-lg:shadow-sm'
         >
           {isPlaying ? (
-            <Pause className='h-4 w-4' />
+            <Pause className='h-4 w-4 max-lg:size-5' />
           ) : (
-            <Play className='h-4 w-4' />
+            <Play className='h-4 w-4 max-lg:size-5 max-lg:ml-0.5' />
           )}
         </Button>
 
-        <div className='flex flex-1 items-center space-x-2 pl-4'>
-          <span className='w-12 text-sm tabular-nums'>
+        <div className='flex flex-1 items-center space-x-2 max-lg:space-x-3 lg:pl-4'>
+          <span className='w-12 text-sm tabular-nums max-lg:text-xs'>
             {formatTime(currentTime)}
           </span>
           <Slider
@@ -816,11 +816,29 @@ export function AudioPlayer({
             onValueChange={handleTimeChange}
             onValueCommit={handleScrubEnd}
             onPointerDown={handleScrubStart}
-            className='w-full'
+            className='w-full max-lg:[&_[role=slider]]:size-4'
           />
-          <span className='w-12 text-sm tabular-nums text-right'>
+          <span className='w-12 text-right text-sm tabular-nums max-lg:text-xs'>
             {formatTime(duration)}
           </span>
+        </div>
+
+        <div className='flex items-center space-x-2 lg:hidden'>
+          <Select
+            value={playbackSpeed.toString()}
+            onValueChange={handleSpeedChange}
+          >
+            <SelectTrigger className='h-9 w-[4.5rem] gap-0 rounded-xl px-2'>
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {PLAYBACK_SPEEDS.map((speed) => (
+                <SelectItem key={speed.value} value={speed.value}>
+                  {speed.label}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
       </div>
     </div>

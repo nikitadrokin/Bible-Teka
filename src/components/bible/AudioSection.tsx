@@ -55,7 +55,7 @@ export function AudioSection({
           nextSrc={nextAudioUrl}
           book={selection.book}
           chapter={selection.chapter}
-          className='mt-4'
+          className='mt-0 max-lg:rounded-2xl max-lg:border-2 max-lg:bg-card/80 max-lg:p-5 max-lg:shadow-sm lg:mt-4'
           onEnded={advanceToNextChapter}
           onPreloadNextTrack={prefetchNextChapter}
         />

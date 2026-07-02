@@ -19,16 +19,19 @@ import { useTranslation } from 'react-i18next';
 import {
   Drawer,
   DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
 } from '../ui/drawer';
 import { DrawerClose } from '../ui/drawer';
 import { useMediaQuery } from '@/hooks/use-media-query';
+import { cn } from '@/lib/utils';
 
-export function HistoryDialog() {
+interface HistoryDialogProps {
+  variant?: 'default' | 'mobile';
+}
+
+export function HistoryDialog({ variant = 'default' }: HistoryDialogProps) {
   const { setSelection } = useBible();
   const { locale } = useLocaleStore();
   const { history, clearHistory } = useHistoryStore();
@@ -38,7 +41,6 @@ export function HistoryDialog() {
   const isDesktop = useMediaQuery('(min-width: 768px)');
 
   const handleSelectHistoryItem = (entry: HistoryEntry) => {
-    // Find the book in the current locale using the stored book ID
     const book = books.find((b) => b.id === entry.bookId);
     if (book && entry.chapter) {
       setSelection({
@@ -57,18 +59,27 @@ export function HistoryDialog() {
     return book?.name || '';
   };
 
+  const triggerButton = (
+    <Button
+      variant={variant === 'mobile' ? 'outline' : 'ghost'}
+      aria-label={t('readingHistory')}
+      className={cn(
+        variant === 'mobile' &&
+          'size-11 shrink-0 rounded-xl border-2 bg-card/80 shadow-sm active:scale-[0.98]',
+      )}
+    >
+      <ClockIcon className={variant === 'mobile' ? 'size-5' : 'h-5 w-5'} />
+      {variant === 'default' && t('viewHistory')}
+    </Button>
+  );
+
   if (isDesktop)
     return (
       <Dialog>
-        <DialogTrigger asChild>
-          <Button variant='ghost' aria-label={t('readingHistory')}>
-            <ClockIcon className='h-5 w-5' />
-            {t('viewHistory')}
-          </Button>
-        </DialogTrigger>
+        <DialogTrigger asChild>{triggerButton}</DialogTrigger>
         <DialogContent className='sm:max-w-md'>
           <DialogHeader className='flex flex-row items-center justify-between pb-2'>
-            <DialogTitle className='text-lg font-bold mr-auto'>
+            <DialogTitle className='mr-auto text-lg font-bold'>
               {t('readingHistory')}
             </DialogTitle>
             <Button
@@ -87,7 +98,7 @@ export function HistoryDialog() {
           </DialogHeader>
           <ScrollArea className='h-[300px] w-full pr-4'>
             {history.length === 0 ? (
-              <p className='text-sm text-muted-foreground text-center py-8'>
+              <p className='py-8 text-center text-sm text-muted-foreground'>
                 {t('noHistory')}
               </p>
             ) : (
@@ -97,7 +108,7 @@ export function HistoryDialog() {
                     <li>
                       <Button
                         variant='ghost'
-                        className='w-full justify-start text-left h-auto py-2'
+                        className='h-auto w-full justify-start py-2 text-left'
                         onClick={() => handleSelectHistoryItem(entry)}
                       >
                         <div>
@@ -121,18 +132,13 @@ export function HistoryDialog() {
 
   return (
     <Drawer>
-      <DrawerTrigger asChild>
-        <Button variant='ghost' aria-label={t('readingHistory')}>
-          <ClockIcon className='h-5 w-5' />
-          {t('viewHistory')}
-        </Button>
-      </DrawerTrigger>
-      <DrawerContent className='h-full'>
-        <ScrollArea className='w-full pr-4 mt-4'>
-          <DrawerHeader className='flex flex-row items-center justify-between pb-2'>
-            <DrawerTitle className='text-lg font-bold mr-auto'>
-              {t('readingHistory')}
-            </DrawerTitle>
+      <DrawerTrigger asChild>{triggerButton}</DrawerTrigger>
+      <DrawerContent className='max-h-[88dvh]'>
+        <DrawerHeader className='flex flex-row items-center justify-between border-b border-border/60 pb-4 text-left'>
+          <DrawerTitle className='text-xl font-bold'>
+            {t('readingHistory')}
+          </DrawerTitle>
+          <div className='flex items-center gap-2'>
             <Button
               variant='destructive'
               size='sm'
@@ -142,14 +148,16 @@ export function HistoryDialog() {
               {t('clearHistory')}
             </Button>
             <DrawerClose asChild>
-              <Button variant='ghost' size='sm' aria-label={t('close')}>
-                <XIcon className='h-5 w-5' />
+              <Button variant='ghost' size='icon' aria-label={t('close')}>
+                <XIcon className='size-5' />
               </Button>
             </DrawerClose>
-          </DrawerHeader>
+          </div>
+        </DrawerHeader>
 
+        <div className='px-4 pt-2'>
           {history.length === 0 ? (
-            <p className='text-sm text-muted-foreground text-center py-8'>
+            <p className='py-8 text-center text-sm text-muted-foreground'>
               {t('noHistory')}
             </p>
           ) : (
@@ -159,7 +167,7 @@ export function HistoryDialog() {
                   <li>
                     <Button
                       variant='ghost'
-                      className='w-full justify-start text-left h-auto py-2'
+                      className='h-auto w-full justify-start rounded-xl py-3 text-left'
                       onClick={() => handleSelectHistoryItem(entry)}
                     >
                       <div>
@@ -176,7 +184,7 @@ export function HistoryDialog() {
               ))}
             </ul>
           )}
-        </ScrollArea>
+        </div>
       </DrawerContent>
     </Drawer>
   );

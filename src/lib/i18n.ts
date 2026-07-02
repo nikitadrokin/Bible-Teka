@@ -11,6 +11,13 @@ const enResources = {
     // Bible navigation
     selectBook: 'Select a Book',
     selectChapter: 'Select a Chapter',
+    chooseBook: 'Choose a book',
+    searchBooks: 'Search books…',
+    noBooksFound: 'No books found',
+    chapterCount: '{{count}} chapters',
+    chapterLabel: 'Chapter {{number}}',
+    nowListening: 'Now listening',
+    close: 'Close',
     oldTestament: 'Old Testament',
     newTestament: 'New Testament',
 
@@ -42,6 +49,13 @@ const ruResources = {
     // Bible navigation
     selectBook: 'Выберите книгу',
     selectChapter: 'Выберите главу',
+    chooseBook: 'Выберите книгу',
+    searchBooks: 'Поиск книг…',
+    noBooksFound: 'Книги не найдены',
+    chapterCount: '{{count}} глав',
+    chapterLabel: 'Глава {{number}}',
+    nowListening: 'Сейчас слушаете',
+    close: 'Закрыть',
     oldTestament: 'Ветхий Завет',
     newTestament: 'Новый Завет',
 
