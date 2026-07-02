@@ -1,11 +1,10 @@
 import { useBible } from './BibleContext';
 import { Button } from '@/components/ui/button';
 import ScrollArea from '@/components/ui/scroll-area';
-import { useLocaleStore } from '@/store/locale-store';
 import { formatDateTime } from '@/lib/utils';
 import { useHistoryStore } from '@/store/history-store';
 import type { HistoryEntry } from '@/store/history-store';
-import { bibleBooksEnglish, bibleBooksRussian } from '@/data/bible';
+import { bibleBooksRussian } from '@/data/bible';
 import {
   Dialog,
   DialogClose,
@@ -19,8 +18,6 @@ import { useTranslation } from 'react-i18next';
 import {
   Drawer,
   DrawerContent,
-  DrawerDescription,
-  DrawerFooter,
   DrawerHeader,
   DrawerTitle,
   DrawerTrigger,
@@ -30,15 +27,13 @@ import { useMediaQuery } from '@/hooks/use-media-query';
 
 export function HistoryDialog() {
   const { setSelection } = useBible();
-  const { locale } = useLocaleStore();
   const { history, clearHistory } = useHistoryStore();
   const { t } = useTranslation();
 
-  const books = locale === 'en' ? bibleBooksEnglish : bibleBooksRussian;
+  const books = bibleBooksRussian;
   const isDesktop = useMediaQuery('(min-width: 768px)');
 
   const handleSelectHistoryItem = (entry: HistoryEntry) => {
-    // Find the book in the current locale using the stored book ID
     const book = books.find((b) => b.id === entry.bookId);
     if (book && entry.chapter) {
       setSelection({
@@ -49,7 +44,7 @@ export function HistoryDialog() {
   };
 
   const getFormattedDate = (timestamp: number) => {
-    return formatDateTime(new Date(timestamp), locale);
+    return formatDateTime(new Date(timestamp));
   };
 
   const getBookName = (bookId: number) => {

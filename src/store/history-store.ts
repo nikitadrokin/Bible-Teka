@@ -1,7 +1,6 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 import type { BibleBookSelection } from '@/types/bible';
-import { useLocaleStore } from './locale-store';
 
 export type HistoryEntry = {
   locale: string;
@@ -43,54 +42,43 @@ export const useHistoryStore = create<HistoryStore>()(
       history,
       lastListenedChapter: get()?.history[0] || null,
       addToHistory: (selection) => {
-        // Only add to history if both stores have hydrated and selection is valid
         if (
           !useHistoryStore.persist.hasHydrated() ||
-          !useLocaleStore.persist.hasHydrated() ||
           !selection.book ||
           !selection.chapter
         )
           return;
 
-        const locale = useLocaleStore.getState().locale;
-
         set((state) => {
-          // Create a new history entry with timestamp
           const newEntry: HistoryEntry = {
-            locale,
+            locale: 'ru',
             bookId: selection.book!.id,
             chapter: selection.chapter!,
             timestamp: Date.now(),
           };
 
-          // Filter out any existing entries with the same book and chapter
           const filteredHistory = state.history.filter(
             (entry) =>
               entry.bookId !== selection.book?.id ||
               entry.chapter !== selection.chapter,
           );
 
-          // Add new entry at the beginning and limit to MAX_HISTORY_ITEMS
           return {
             history: [newEntry, ...filteredHistory].slice(0, MAX_HISTORY_ITEMS),
           };
         });
       },
       setLastListenedChapter: (selection) => {
-        // Only update if both stores have hydrated and selection is valid
         if (
           !useHistoryStore.persist.hasHydrated() ||
-          !useLocaleStore.persist.hasHydrated() ||
           !selection.book ||
           !selection.chapter
         )
           return;
 
-        const locale = useLocaleStore.getState().locale;
-
         set({
           lastListenedChapter: {
-            locale,
+            locale: 'ru',
             bookId: selection.book.id,
             chapter: selection.chapter,
           },

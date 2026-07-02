@@ -1,8 +1,7 @@
-import { bibleBooksEnglish, bibleBooksRussian } from '@/data/bible';
+import { bibleBooksRussian } from '@/data/bible';
 import { Button } from '../ui/button';
 import { Label } from '../ui/label';
 import { useTranslation } from 'react-i18next';
-import { useLocaleStore } from '@/store/locale-store';
 import { cn } from '@/lib/utils';
 
 interface BookSelectorProps {
@@ -15,11 +14,9 @@ export function BookSelector({
   onBookSelect,
 }: BookSelectorProps) {
   const { t } = useTranslation();
-  const { locale } = useLocaleStore();
 
-  const books = locale === 'en' ? bibleBooksEnglish : bibleBooksRussian;
+  const books = bibleBooksRussian;
 
-  // Split books into Old Testament (0-38) and New Testament (39-65)
   const oldTestamentBooks = books.slice(0, 39);
   const newTestamentBooks = books.slice(39);
 
@@ -33,9 +30,7 @@ export function BookSelector({
           <div
             className={cn(
               'grid gap-y-2 gap-x-4',
-              locale === 'en'
-                ? 'grid-cols-[repeat(auto-fill,minmax(115px,1fr))]'
-                : 'grid-cols-[repeat(auto-fill,minmax(145px,1fr))]',
+              'grid-cols-[repeat(auto-fill,minmax(145px,1fr))]',
             )}
           >
             {oldTestamentBooks.map((book) => {
@@ -75,9 +70,7 @@ export function BookSelector({
           <div
             className={cn(
               'grid gap-y-2 gap-x-4',
-              locale === 'en'
-                ? 'grid-cols-[repeat(auto-fill,minmax(115px,1fr))]'
-                : 'grid-cols-[repeat(auto-fill,minmax(145px,1fr))]',
+              'grid-cols-[repeat(auto-fill,minmax(145px,1fr))]',
             )}
           >
             {newTestamentBooks.map((book) => {

@@ -12,21 +12,14 @@ const mockSelection = (
 
 describe('getYouVersionChapterUrl', () => {
   it('returns a formatted YouVersion URL for known books', () => {
-    expect(getYouVersionChapterUrl(mockSelection(39, 3), 'en')).toBe(
-      'https://www.bible.com/bible/59/MAT.3.NIV',
-    );
-  });
-
-  it('falls back to English when locale configuration is missing', () => {
-    // @ts-expect-error Testing fallback for an unsupported locale
-    expect(getYouVersionChapterUrl(mockSelection(0, 1), 'es')).toBe(
-      'https://www.bible.com/bible/59/GEN.1.NIV',
+    expect(getYouVersionChapterUrl(mockSelection(39, 3))).toBe(
+      'https://www.bible.com/bible/400/MAT.3.RUSV',
     );
   });
 
   it('returns null when selection is incomplete', () => {
     expect(
-      getYouVersionChapterUrl({ book: null, chapter: null }, 'en'),
+      getYouVersionChapterUrl({ book: null, chapter: null }),
     ).toBeNull();
   });
 
@@ -34,7 +27,6 @@ describe('getYouVersionChapterUrl', () => {
     expect(
       getYouVersionChapterUrl(
         { book: { id: 100, name: 'Unknown', chapters: 1 }, chapter: 1 },
-        'en',
       ),
     ).toBeNull();
   });

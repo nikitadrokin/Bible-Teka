@@ -49,8 +49,8 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
         content: 'width=device-width, initial-scale=1, viewport-fit=cover',
       },
       {
-        title: 'Bible Teka',
-        description: 'Clone of Bible Teka for personal use',
+        title: 'БиблияТека',
+        description: 'Аудио Библия на русском языке',
       },
       {
         name: 'apple-mobile-web-app-capable',
@@ -100,7 +100,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
     // check what's causing this incorrect bg color to be applied
-    <html lang='en'>
+    <html lang='ru'>
       <head>
         <HeadContent />
       </head>

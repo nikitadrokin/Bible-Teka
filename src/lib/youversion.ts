@@ -1,5 +1,4 @@
 import type { BibleBookSelection } from '@/types/bible';
-import type { Locale } from '@/store/locale-store';
 
 // YouVersion book codes mapped to Russian Synodal book order (used in bible.ts)
 // Russian NT order: Gospels → Acts → Catholic Epistles (James, 1-2 Peter, 1-3 John, Jude)
@@ -77,17 +76,10 @@ const YOUVERSION_BOOK_CODES = [
   'REV',  // 65 - Revelation
 ] as const;
 
-const YOUVERSION_LOCALE_CONFIG: Record<
-  Locale,
-  { versionId: string; translation: string }
-> = {
-  en: { versionId: '59', translation: 'NIV' },
-  ru: { versionId: '400', translation: 'RUSV' },
-};
+const YOUVERSION_RUSV = { versionId: '400', translation: 'RUSV' } as const;
 
 export function getYouVersionChapterUrl(
   selection: BibleBookSelection,
-  locale: Locale,
 ): string | null {
   if (!selection.book || !selection.chapter) {
     return null;
@@ -98,8 +90,7 @@ export function getYouVersionChapterUrl(
     return null;
   }
 
-  const { versionId, translation } =
-    YOUVERSION_LOCALE_CONFIG[locale] ?? YOUVERSION_LOCALE_CONFIG.ru;
+  const { versionId, translation } = YOUVERSION_RUSV;
 
   return `https://www.bible.com/bible/${versionId}/${bookCode}.${selection.chapter}.${translation}`;
 }

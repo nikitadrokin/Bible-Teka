@@ -9,8 +9,7 @@ import { useQuery } from '@tanstack/react-query';
 import { useQueryClient } from '@tanstack/react-query';
 import { useQueryStates, parseAsString, parseAsInteger } from 'nuqs';
 import type { BibleBookSelection, BibleBook } from '@/types/bible';
-import { bibleBooksEnglish, bibleBooksRussian } from '@/data/bible';
-import { useLocaleStore } from '@/store/locale-store';
+import { bibleBooksRussian } from '@/data/bible';
 import { useHistoryStore } from '@/store/history-store';
 import {
   getAudioUrlForSelection,
@@ -68,8 +67,7 @@ async function resolveAudioUrl(
 }
 
 export function BibleProvider({ children }: { children: ReactNode }) {
-  const { locale } = useLocaleStore();
-  const books = locale === 'en' ? bibleBooksEnglish : bibleBooksRussian;
+  const books = bibleBooksRussian;
   const queryClient = useQueryClient();
   const { history, lastListenedChapter, addToHistory, setLastListenedChapter } =
     useHistoryStore();
@@ -90,11 +88,9 @@ export function BibleProvider({ children }: { children: ReactNode }) {
     if (bookSlug !== null) return; // URL already has a book, don't overwrite
 
     const historyHasHydrated = useHistoryStore.persist.hasHydrated();
-    const localeHasHydrated = useLocaleStore.persist.hasHydrated();
 
     if (
       historyHasHydrated &&
-      localeHasHydrated &&
       lastListenedChapter &&
       typeof lastListenedChapter.bookId === 'number' &&
       lastListenedChapter.chapter
@@ -109,11 +105,9 @@ export function BibleProvider({ children }: { children: ReactNode }) {
   // Add to history and update last listened when selection changes (only after both stores hydrated)
   useEffect(() => {
     const historyHasHydrated = useHistoryStore.persist.hasHydrated();
-    const localeHasHydrated = useLocaleStore.persist.hasHydrated();
 
     if (
       historyHasHydrated &&
-      localeHasHydrated &&
       selection.book &&
       selection.chapter
     ) {
