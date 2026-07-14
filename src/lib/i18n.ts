@@ -16,6 +16,16 @@ const ruResources = {
     clearHistory: 'Очистить историю',
     noHistory: 'История чтения пуста',
     close: 'Закрыть',
+    chapterText: 'Текст главы',
+    readerSignInPrompt:
+      'Войдите через YouVersion, чтобы читать текст главы во время прослушивания',
+    signInWithYouVersion: 'Войти через YouVersion',
+    signOutAction: 'Выйти',
+    translationLabel: 'Перевод',
+    failedToLoadText: 'Не удалось загрузить текст главы',
+    signingIn: 'Выполняется вход…',
+    signInFailed: 'Не удалось войти. Попробуйте ещё раз.',
+    backToApp: 'Вернуться на главную',
   },
 };
 

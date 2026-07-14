@@ -17,6 +17,14 @@ To build this application for production:
 pnpm build
 ```
 
+# YouVersion Read-Along
+
+The reader below the audio player fetches chapter text from the [YouVersion Platform](https://developers.youversion.com). Setup:
+
+1. Set `VITE_YVP_APP_KEY` in `.env` to your YouVersion Platform app key (see `.env.example`).
+2. In the YouVersion developer portal, register the OAuth callback URL for every origin the app runs on, e.g. `http://localhost:3000/auth/callback` and `https://<production-domain>/auth/callback`. Sign-in fails with `redirect_uri does not match registered callback URL` until this is done.
+3. Users sign in with YouVersion to unlock Bible text (app-key-only access is limited to the versions licensed to the app). The default version is SYNO (Синодальный перевод, id 400); any version from the signed-in user's Russian version list can be selected.
+
 ## Testing
 
 This project uses [Vitest](https://vitest.dev/) for testing. You can run the tests with:

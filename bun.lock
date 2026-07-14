@@ -26,6 +26,7 @@
         "@trpc/server": "^11.4.4",
         "@trpc/tanstack-react-query": "^11.4.4",
         "@vite-pwa/assets-generator": "^1.0.0",
+        "@youversion/platform-react-hooks": "^2.2.0",
         "class-variance-authority": "^0.7.1",
         "clsx": "^2.1.1",
         "i18next": "^25.3.6",
@@ -664,6 +665,10 @@
     "@whatwg-node/promise-helpers": ["@whatwg-node/promise-helpers@1.3.2", "", { "dependencies": { "tslib": "^2.6.3" } }, "sha512-Nst5JdK47VIl9UcGwtv2Rcgyn5lWtZ0/mhRQ4G8NN2isxpq2TO30iqHzmwoJycjWuyUfg3GFXqP/gFHXeV57IA=="],
 
     "@whatwg-node/server": ["@whatwg-node/server@0.9.71", "", { "dependencies": { "@whatwg-node/disposablestack": "^0.0.6", "@whatwg-node/fetch": "^0.10.5", "@whatwg-node/promise-helpers": "^1.2.2", "tslib": "^2.6.3" } }, "sha512-ueFCcIPaMgtuYDS9u0qlUoEvj6GiSsKrwnOLPp9SshqjtcRaR1IEHRjoReq3sXNydsF5i0ZnmuYgXq9dV53t0g=="],
+
+    "@youversion/platform-core": ["@youversion/platform-core@2.2.0", "", { "dependencies": { "zod": "4.1.12" }, "peerDependencies": { "linkedom": "^0.18.12" }, "optionalPeers": ["linkedom"] }, "sha512-b+CitZyGWzSb+0z85T1p9NH3AEA/ML/M2B8DxMncptcx6yUyEcYwtry/t1p6CX42D252u1+SOrIN0vK0oATCWA=="],
+
+    "@youversion/platform-react-hooks": ["@youversion/platform-react-hooks@2.2.0", "", { "dependencies": { "@youversion/platform-core": "2.2.0" }, "peerDependencies": { "react": ">=19.1.0 <20.0.0" } }, "sha512-QrPe2g6Lg0IM1D2LSh2OFWO4f1DBlhXZtvpSRYTt36lPaaXkV89RxJEJYk3G0eJ1ZyrzkwuxYGvfQYJetSLTfA=="],
 
     "abbrev": ["abbrev@3.0.1", "", {}, "sha512-AO2ac6pjRB3SJmGJo+v5/aK6Omggp6fsLrs6wN9bd35ulu4cCwaAU9+7ZhXjeqHVkaHThLuzH0nZr0YpCDhygg=="],
 
@@ -1816,6 +1821,8 @@
     "@vue/compiler-sfc/estree-walker": ["estree-walker@2.0.2", "", {}, "sha512-Rfkk/Mp/DL7JVje3u18FxFujQlTNR2q6QfMSMB7AvCBx91NGj/ba3kCfza0f6dVDbw7YlRf/nDrn7pQrCCyQ/w=="],
 
     "@whatwg-node/fetch/urlpattern-polyfill": ["urlpattern-polyfill@10.1.0", "", {}, "sha512-IGjKp/o0NL3Bso1PymYURCJxMPNAf/ILOpendP9f5B6e1rTJgdgiOvgfoT8VxCAdY+Wisb9uhGaJJf3yZ2V9nw=="],
+
+    "@youversion/platform-core/zod": ["zod@4.1.12", "", {}, "sha512-JInaHOamG8pt5+Ey8kGmdcAcg3OL9reK8ltczgHTAwNhMys/6ThXHityHxVV2p3fkw/c+MAvBHFVYHFZDmjMCQ=="],
 
     "anymatch/picomatch": ["picomatch@2.3.1", "", {}, "sha512-JU3teHTNjmE2VCGFzuY8EXzCDVwEqB2a8fsIvwaStHhAWJEeVd1o1QD80CU6+ZdEXXSLbSsuLwJjkCBWqRQUVA=="],
 

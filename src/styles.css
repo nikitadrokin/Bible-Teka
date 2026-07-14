@@ -227,3 +227,44 @@ code {
   height: 100dvh;
   pointer-events: none;
 }
+
+/* YouVersion passage HTML (USX-derived markup) */
+.bible-reader {
+  font-size: 1.0625rem;
+  line-height: 1.9;
+  color: var(--foreground);
+}
+
+.bible-reader .p,
+.bible-reader .m,
+.bible-reader .pi {
+  margin-bottom: 0.75rem;
+}
+
+.bible-reader .q1,
+.bible-reader .q2 {
+  margin-left: 1.25rem;
+}
+
+.bible-reader .q2 {
+  margin-left: 2.5rem;
+}
+
+.bible-reader .s,
+.bible-reader .s1,
+.bible-reader .s2,
+.bible-reader .ms,
+.bible-reader .ms1 {
+  font-weight: 600;
+  margin-top: 1.25rem;
+  margin-bottom: 0.5rem;
+}
+
+.bible-reader .label {
+  font-size: 0.7em;
+  font-weight: 600;
+  vertical-align: super;
+  color: var(--muted-foreground);
+  margin-right: 0.2em;
+  user-select: none;
+}

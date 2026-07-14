@@ -76,9 +76,10 @@ const YOUVERSION_BOOK_CODES = [
   'REV',  // 65 - Revelation
 ] as const;
 
-const YOUVERSION_RUSV = { versionId: '400', translation: 'RUSV' } as const;
+// Synodal translation (Синодальный перевод) on YouVersion
+export const SYNO_VERSION = { id: 400, abbreviation: 'SYNO' } as const;
 
-export function getYouVersionChapterUrl(
+export function getUsfmChapter(
   selection: BibleBookSelection,
 ): string | null {
   if (!selection.book || !selection.chapter) {
@@ -90,7 +91,17 @@ export function getYouVersionChapterUrl(
     return null;
   }
 
-  const { versionId, translation } = YOUVERSION_RUSV;
+  return `${bookCode}.${selection.chapter}`;
+}
 
-  return `https://www.bible.com/bible/${versionId}/${bookCode}.${selection.chapter}.${translation}`;
+export function getYouVersionChapterUrl(
+  selection: BibleBookSelection,
+  version: { id: number; abbreviation: string } = SYNO_VERSION,
+): string | null {
+  const usfm = getUsfmChapter(selection);
+  if (!usfm) {
+    return null;
+  }
+
+  return `https://www.bible.com/bible/${version.id}/${usfm}.${version.abbreviation}`;
 }
