@@ -16,6 +16,28 @@ import type { TRPCOptionsProxy } from '@trpc/tanstack-react-query';
 import { BibleProvider, useBible } from '@/components/bible/BibleContext';
 import { useTranslation } from 'react-i18next';
 
+const siteUrl = 'https://bibleteka.nkdr.me/';
+const siteTitle = 'БиблияТека — аудиобиблия на русском языке';
+const siteDescription =
+  'Слушайте и читайте Библию на русском языке: выбирайте книгу и главу, включайте аудио и продолжайте с того места, где остановились.';
+
+const structuredData = {
+  '@context': 'https://schema.org',
+  '@type': 'WebApplication',
+  name: 'БиблияТека',
+  url: siteUrl,
+  description: siteDescription,
+  applicationCategory: 'EducationalApplication',
+  operatingSystem: 'Any',
+  inLanguage: 'ru',
+  isAccessibleForFree: true,
+  author: {
+    '@type': 'Person',
+    name: 'Nikita Drokin',
+    url: 'https://nikitadrokin.com/',
+  },
+};
+
 interface MyRouterContext {
   queryClient: QueryClient;
 
@@ -30,7 +52,7 @@ function DynamicTitle() {
     const title =
       selection.book && selection.chapter
         ? `${selection.book.name} ${selection.chapter} | ${t('appTitle')}`
-        : t('appTitle');
+        : siteTitle;
 
     document.title = title;
   }, [selection.book, selection.chapter]);
@@ -49,8 +71,72 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
         content: 'width=device-width, initial-scale=1, viewport-fit=cover',
       },
       {
-        title: 'БиблияТека',
-        description: 'Аудио Библия на русском языке',
+        title: siteTitle,
+      },
+      {
+        name: 'description',
+        content: siteDescription,
+      },
+      {
+        name: 'author',
+        content: 'Nikita Drokin',
+      },
+      {
+        name: 'robots',
+        content:
+          'index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1',
+      },
+      {
+        property: 'og:type',
+        content: 'website',
+      },
+      {
+        property: 'og:locale',
+        content: 'ru_RU',
+      },
+      {
+        property: 'og:site_name',
+        content: 'БиблияТека',
+      },
+      {
+        property: 'og:title',
+        content: siteTitle,
+      },
+      {
+        property: 'og:description',
+        content: siteDescription,
+      },
+      {
+        property: 'og:url',
+        content: siteUrl,
+      },
+      {
+        property: 'og:image',
+        content: `${siteUrl}logo.png`,
+      },
+      {
+        property: 'og:image:alt',
+        content: 'Логотип БиблияТеки',
+      },
+      {
+        name: 'twitter:card',
+        content: 'summary',
+      },
+      {
+        name: 'twitter:title',
+        content: siteTitle,
+      },
+      {
+        name: 'twitter:description',
+        content: siteDescription,
+      },
+      {
+        name: 'twitter:image',
+        content: `${siteUrl}logo.png`,
+      },
+      {
+        name: 'theme-color',
+        content: '#e6d8b8',
       },
       {
         name: 'apple-mobile-web-app-capable',
@@ -62,6 +148,14 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
       },
     ],
     links: [
+      {
+        rel: 'canonical',
+        href: siteUrl,
+      },
+      {
+        rel: 'icon',
+        href: '/favicon.ico',
+      },
       {
         rel: 'stylesheet',
         href: appCss,
@@ -86,7 +180,7 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 
   component: () => (
     <RootDocument>
-      <div className='texture' />
+      <div className="texture" />
       <NuqsAdapter>
         <BibleProvider>
           <DynamicTitle />
@@ -100,9 +194,12 @@ export const Route = createRootRouteWithContext<MyRouterContext>()({
 function RootDocument({ children }: { children: React.ReactNode }) {
   return (
     // check what's causing this incorrect bg color to be applied
-    <html lang='ru'>
+    <html lang="ru">
       <head>
         <HeadContent />
+        <script type="application/ld+json">
+          {JSON.stringify(structuredData)}
+        </script>
       </head>
       <body>
         {children}

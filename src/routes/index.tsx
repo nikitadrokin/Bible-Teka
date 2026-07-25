@@ -31,10 +31,16 @@ function BibleNavigator() {
   return (
     <div className='app-container bg-background min-h-screen select-none' data-vaul-drawer-wrapper>
       <div className='container mx-auto p-4 lg:p-8 max-w-5xl'>
-        <div className='flex justify-between items-center mb-8 lg:mb-12'>
-          <h1 className='text-3xl font-bold text-foreground inline-block'>
-            {t('appTitle')}
-          </h1>
+        <div className='flex items-start justify-between gap-6 mb-8 lg:mb-12'>
+          <div>
+            <h1 className='text-3xl font-bold text-foreground inline-block'>
+              {t('appTitle')}
+            </h1>
+            <p className='mt-2 max-w-xl text-sm leading-6 text-muted-foreground'>
+              Слушайте и читайте Библию на русском языке. Выберите книгу и
+              главу, чтобы начать.
+            </p>
+          </div>
           <HistoryDialog />
         </div>
 

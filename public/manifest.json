@@ -1,42 +1,42 @@
 {
-  "short_name": "Bible Teka",
-  "name": "Bible Teka",
+  "short_name": "БиблияТека",
+  "name": "БиблияТека — аудиобиблия на русском языке",
   "icons": [
     {
-      "src": "favicon.ico",
+      "src": "/favicon.ico",
       "sizes": "64x64 32x32 24x24 16x16",
       "type": "image/x-icon"
     },
     {
-      "src": "logo192.png",
+      "src": "/pwa-192x192.png",
       "type": "image/png",
       "sizes": "192x192"
     },
     {
-      "src": "logo512.png",
+      "src": "/pwa-512x512.png",
       "type": "image/png",
       "sizes": "512x512"
     },
     {
-      "src": "apple-touch-icon-180x180.png",
+      "src": "/apple-touch-icon-180x180.png",
       "sizes": "180x180",
       "type": "image/png",
       "purpose": "any"
     },
     {
-      "src": "maskable-icon-512x512.png",
+      "src": "/maskable-icon-512x512.png",
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "maskable"
     }
   ],
-  "start_url": ".",
+  "start_url": "/",
   "display": "standalone",
   "theme_color": "#000000",
   "background_color": "oklch(0.91 0.048 83.6)",
   "orientation": "portrait",
-  "description": "Audio Bible player for personal use",
+  "description": "Слушайте и читайте Библию на русском языке.",
   "apple-mobile-web-app-capable": "yes",
   "apple-mobile-web-app-status-bar-style": "black-translucent",
-  "apple-mobile-web-app-title": "Bible Teka"
+  "apple-mobile-web-app-title": "БиблияТека"
 }
