@@ -33,6 +33,7 @@ const structuredData = {
   isAccessibleForFree: true,
   author: {
     '@type': 'Person',
+    '@id': 'https://nikitadrokin.com/#person',
     name: 'Nikita Drokin',
     url: 'https://nikitadrokin.com/',
   },
