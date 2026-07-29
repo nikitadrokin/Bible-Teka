@@ -36,10 +36,6 @@ function BibleNavigator() {
             <h1 className='text-3xl font-bold text-foreground inline-block'>
               {t('appTitle')}
             </h1>
-            <p className='mt-2 max-w-xl text-sm leading-6 text-muted-foreground'>
-              Слушайте и читайте Библию на русском языке. Выберите книгу и
-              главу, чтобы начать.
-            </p>
           </div>
           <HistoryDialog />
         </div>
